@@ -22,6 +22,8 @@ import static org.apache.commons.lang.StringUtils.join;
 import static org.apache.commons.lang.StringUtils.repeat;
 
 import com.google.common.collect.Lists;
+
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.SQLException;
@@ -673,7 +675,7 @@ class MetaStoreDirectSql {
     loopJoinOrderedResult(sds, queryText, 0, new ApplyFunc<StorageDescriptor>() {
       @Override
       public void apply(StorageDescriptor t, Object[] fields) {
-        t.putToParameters((String)fields[1], (String)fields[2]);
+        t.putToParameters((String)fields[1], extractSqlClob(fields[2]));
       }});
 
     queryText = "select \"SD_ID\", \"COLUMN_NAME\", \"SORT_COLS\".\"ORDER\" from \"SORT_COLS\""
@@ -799,7 +801,7 @@ class MetaStoreDirectSql {
       loopJoinOrderedResult(colss, queryText, 0, new ApplyFunc<List<FieldSchema>>() {
         @Override
         public void apply(List<FieldSchema> t, Object[] fields) {
-          t.add(new FieldSchema((String)fields[2], (String)fields[3], (String)fields[1]));
+          t.add(new FieldSchema((String)fields[2], extractSqlClob(fields[3]), (String)fields[1]));
         }});
     }
 
@@ -810,7 +812,7 @@ class MetaStoreDirectSql {
     loopJoinOrderedResult(serdes, queryText, 0, new ApplyFunc<SerDeInfo>() {
       @Override
       public void apply(SerDeInfo t, Object[] fields) {
-        t.putToParameters((String)fields[1], (String)fields[2]);
+        t.putToParameters((String)fields[1], extractSqlClob(fields[2]));
       }});
 
     return orderedResult;
@@ -883,6 +885,21 @@ class MetaStoreDirectSql {
     if (value == null) return null;
     return value.toString();
   }
+
+  private String extractSqlClob(Object value) {
+    if (value == null) return null;
+    try {
+      if (value instanceof Clob) {
+        // we trim the Clob value to a max length an int can hold
+        int maxLength = (((Clob) value).length() < Integer.MAX_VALUE - 2) ? (int) ((Clob) value).length() : Integer.MAX_VALUE - 2;
+        return ((Clob)value).getSubString(1L, maxLength);
+      } else {
+        return value.toString();
+      }
+    } catch (SQLException sqle) {
+      return null;
+      }
+    }
 
   private static String trimCommaList(StringBuilder sb) {
     if (sb.length() > 0) {
