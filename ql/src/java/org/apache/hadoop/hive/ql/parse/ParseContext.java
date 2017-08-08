@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.hadoop.hive.conf.HiveConf;
-import org.apache.hadoop.hive.conf.HiveConf.ConfVars;
 import org.apache.hadoop.hive.ql.Context;
 import org.apache.hadoop.hive.ql.QueryProperties;
 import org.apache.hadoop.hive.ql.QueryState;
@@ -50,7 +49,6 @@ import org.apache.hadoop.hive.ql.metadata.Table;
 import org.apache.hadoop.hive.ql.optimizer.ppr.PartitionPruner;
 import org.apache.hadoop.hive.ql.optimizer.unionproc.UnionProcContext;
 import org.apache.hadoop.hive.ql.parse.BaseSemanticAnalyzer.AnalyzeRewriteContext;
-import org.apache.hadoop.hive.ql.parse.RuntimeValuesInfo;
 import org.apache.hadoop.hive.ql.plan.CreateTableDesc;
 import org.apache.hadoop.hive.ql.plan.CreateViewDesc;
 import org.apache.hadoop.hive.ql.plan.ExprNodeDesc;
@@ -431,6 +429,21 @@ public class ParseContext {
   public void setOpToSamplePruner(
       HashMap<TableScanOperator, SampleDesc> opToSamplePruner) {
     this.opToSamplePruner = opToSamplePruner;
+  }
+
+  /**
+   * @return col stats
+   */
+  public Map<String, ColumnStatsList> getColStatsCache() {
+    return ctx.getOpContext().getColStatsCache();
+  }
+
+  /**
+   * @param partList
+   * @return col stats
+   */
+  public ColumnStatsList getColStatsCached(PrunedPartitionList partList) {
+    return ctx.getOpContext().getColStatsCache().get(partList.getKey());
   }
 
   /**
