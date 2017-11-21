@@ -40,6 +40,14 @@ public class AbstractOperatorDesc implements OperatorDesc {
   protected long memAvailable = 0;
   protected String runtimeStatsTmpDir;
 
+  
+  /**
+   * A map of output column name to input expression map. This is used by
+   * optimizer and built during semantic analysis contains only key elements for
+   * reduce sink and group by op
+   */
+  protected Map<String, ExprNodeDesc> colExprMap;
+
   @Override
   @Explain(skipHeader = true, displayName = "Statistics")
   public Statistics getStatistics() {
@@ -124,4 +132,17 @@ public class AbstractOperatorDesc implements OperatorDesc {
     this.runtimeStatsTmpDir = runtimeStatsTmpDir;
   }
 
+  @Explain(displayName = "columnExprMap", jsonOnly = true)
+  public Map<String, ExprNodeDesc> getColumnExprMapForExplain() {
+    return this.colExprMap;
+  }
+  @Override
+  public Map<String, ExprNodeDesc> getColumnExprMap() {
+    return this.colExprMap;
+  }
+
+  @Override
+  public void setColumnExprMap(Map<String, ExprNodeDesc> colExprMap) {
+    this.colExprMap = colExprMap;
+  }
 }

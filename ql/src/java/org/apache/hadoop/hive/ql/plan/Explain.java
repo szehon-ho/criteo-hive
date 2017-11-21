@@ -74,4 +74,6 @@ public @interface Explain {
     }
   };
   Vectorization vectorization() default Vectorization.NON_VECTORIZED;
+
+  boolean jsonOnly() default false;
 }

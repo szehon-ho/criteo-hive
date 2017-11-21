@@ -34,4 +34,6 @@ public interface OperatorDesc extends Serializable, Cloneable {
   public void setMaxMemoryAvailable(long memoryAvailble);
   public String getRuntimeStatsTmpDir();
   public void setRuntimeStatsTmpDir(String runtimeStatsTmpDir);
+  public Map<String, ExprNodeDesc> getColumnExprMap();
+  public void setColumnExprMap(Map<String, ExprNodeDesc> colExprMap);
 }

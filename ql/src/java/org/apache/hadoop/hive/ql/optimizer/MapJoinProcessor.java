@@ -437,6 +437,7 @@ public class MapJoinProcessor extends Transform {
         smbJoinDesc.getFilters(), smbJoinDesc.isNoOuterJoin(), smbJoinDesc.getDumpFilePrefix());
 
     mapJoinDesc.setStatistics(smbJoinDesc.getStatistics());
+    mapJoinDesc.setColumnExprMap(smbJoinDesc.getColumnExprMap());
 
     RowSchema joinRS = smbJoinOp.getSchema();
     // The mapjoin has the same schema as the join operator
@@ -1193,6 +1194,7 @@ public class MapJoinProcessor extends Transform {
     mapJoinDescriptor.setNullSafes(desc.getNullSafes());
     mapJoinDescriptor.setFilterMap(desc.getFilterMap());
     mapJoinDescriptor.setResidualFilterExprs(desc.getResidualFilterExprs());
+    mapJoinDescriptor.setColumnExprMap(colExprMap);
     if (!valueIndices.isEmpty()) {
       mapJoinDescriptor.setValueIndices(valueIndices);
     }
