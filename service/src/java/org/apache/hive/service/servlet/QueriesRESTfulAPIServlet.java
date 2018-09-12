@@ -153,6 +153,7 @@ public class QueriesRESTfulAPIServlet extends HttpServlet {
             jgen.writeNumberField("operationCount", hiveSession.getOpenOperationCount());
             jgen.writeNumberField("activeTime", (currentTime - hiveSession.getCreationTime()) / 1000);
             jgen.writeNumberField("idleTime", (currentTime - hiveSession.getLastAccessTime()) / 1000);
+            jgen.writeStringField("sessionId", hiveSession.getSessionHandle().getSessionId().toString());
             jgen.writeEndObject();
         }
     }
