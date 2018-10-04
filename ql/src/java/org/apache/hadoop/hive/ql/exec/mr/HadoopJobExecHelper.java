@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.hadoop.hive.common.LogUtils;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.conf.HiveConf.ConfVars;
 import org.apache.hadoop.hive.ql.Context;
@@ -238,6 +239,10 @@ public class HadoopJobExecHelper {
     List<ClientStatsPublisher> clientStatPublishers = getClientStatPublishers();
     final boolean localMode = ShimLoader.getHadoopShims().isLocalMode(job);
 
+    MapRedStats mapRedStats = new MapRedStats(
+            numMap, numReduce, cpuMsec, false, rj.getID().toString());
+    updateMapRedTaskWebUIStatistics(mapRedStats, rj);
+
     while (!rj.isComplete()) {
       if (th.getContext() != null) {
         th.getContext().checkHeartbeaterLockException();
@@ -312,6 +317,11 @@ public class HadoopJobExecHelper {
       }
 
       Counters ctrs = th.getCounters();
+
+      mapRedStats.setCounters(ctrs);
+      mapRedStats.setNumMap(numMap);
+      mapRedStats.setNumReduce(numReduce);
+      updateMapRedTaskWebUIStatistics(mapRedStats, rj);
 
       if (fatal = checkFatalErrors(ctrs, errMsg)) {
         console.printError("[Fatal Error] " + errMsg.toString() + ". Killing the job.");
@@ -418,8 +428,10 @@ public class HadoopJobExecHelper {
       }
     }
 
-    MapRedStats mapRedStats = new MapRedStats(numMap, numReduce, cpuMsec, success, rj.getID().toString());
+    mapRedStats.setSuccess(success);
     mapRedStats.setCounters(ctrs);
+    mapRedStats.setCpuMSec(cpuMsec);
+    updateMapRedTaskWebUIStatistics(mapRedStats, rj);
 
     // update based on the final value of the counters
     updateCounters(ctrs, rj);
@@ -430,6 +442,12 @@ public class HadoopJobExecHelper {
     }
     // LOG.info(queryPlan);
     return mapRedStats;
+  }
+
+  private void updateMapRedTaskWebUIStatistics(MapRedStats mapRedStats, RunningJob rj) {
+    if (task instanceof MapRedTask) {
+      ((MapRedTask) task).updateWebUiStats(mapRedStats, rj);
+    }
   }
 
 
@@ -500,14 +518,7 @@ public class HadoopJobExecHelper {
     sb.append("Task ID:\n  " + taskId + "\n\n");
     sb.append("Logs:\n");
     console.printError(sb.toString());
-
-    for (Appender appender : ((Logger) LogManager.getRootLogger()).getAppenders().values()) {
-      if (appender instanceof FileAppender) {
-        console.printError(((FileAppender) appender).getFileName());
-      } else if (appender instanceof RollingFileAppender) {
-        console.printError(((RollingFileAppender) appender).getFileName());
-      }
-    }
+    console.printError(LogUtils.getLogFilePath());
   }
 
   public int progressLocal(Process runningJob, String taskId) {

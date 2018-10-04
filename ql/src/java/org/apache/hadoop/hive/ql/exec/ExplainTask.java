@@ -115,6 +115,7 @@ import org.slf4j.LoggerFactory;
  *
  **/
 public class ExplainTask extends Task<ExplainWork> implements Serializable {
+  public static final String STAGE_DEPENDENCIES = "STAGE DEPENDENCIES";
   private static final long serialVersionUID = 1L;
   public static final String EXPL_COLUMN_NAME = "Explain";
   public static final String OUTPUT_OPERATORS = "OutputOperators:";
@@ -302,7 +303,7 @@ public class ExplainTask extends Task<ExplainWork> implements Serializable {
       }
 
       if (jsonOutput) {
-        outJSONObject.put("STAGE DEPENDENCIES", jsonDependencies);
+        outJSONObject.put(STAGE_DEPENDENCIES, jsonDependencies);
       }
 
       // Go over all the tasks and dump out the plans
@@ -1183,7 +1184,7 @@ public class ExplainTask extends Task<ExplainWork> implements Serializable {
       throws Exception {
 
     if (out != null) {
-      out.println("STAGE DEPENDENCIES:");
+      out.println(STAGE_DEPENDENCIES + ":");
     }
 
     JSONObject json = jsonOutput ? new JSONObject(new LinkedHashMap<>()) : null;
