@@ -185,11 +185,8 @@ public class HBaseStorageHandler extends DefaultStorageHandler
   public void preCreateTable(Table tbl) throws MetaException {
     boolean isExternal = MetaStoreUtils.isExternalTable(tbl);
 
-    // We'd like to move this to HiveMetaStore for any non-native table, but
-    // first we need to support storing NULL for location on a table
-    if (tbl.getSd().getLocation() != null) {
-      throw new MetaException("LOCATION may not be specified for HBase.");
-    }
+    // HIVE-8950 removes assert for location in table's sd to be null. The change allows Serdes to
+    // receive table location, which is required by serdes like ParquetHiveSerde.
 
     HTable htable = null;
 

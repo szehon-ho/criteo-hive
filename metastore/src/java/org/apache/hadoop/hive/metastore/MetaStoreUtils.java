@@ -435,11 +435,17 @@ public class MetaStoreUtils {
     try {
       Deserializer deserializer = ReflectionUtil.newInstance(conf.getClassByName(lib).
               asSubclass(Deserializer.class), conf);
+
+      final Properties tableMetadata = MetaStoreUtils.getTableMetadata(table);
+      if (tableMetadata.getProperty("location", null) == null &&
+          table.getSd().getLocation() != null) {
+        tableMetadata.setProperty("location", table.getSd().getLocation());
+      }
       if (skipConfError) {
         SerDeUtils.initializeSerDeWithoutErrorCheck(deserializer, conf,
-                MetaStoreUtils.getTableMetadata(table), null);
+            tableMetadata, null);
       } else {
-        SerDeUtils.initializeSerDe(deserializer, conf, MetaStoreUtils.getTableMetadata(table), null);
+        SerDeUtils.initializeSerDe(deserializer, conf, tableMetadata, null);
       }
       return deserializer;
     } catch (RuntimeException e) {
