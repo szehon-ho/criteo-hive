@@ -86,14 +86,14 @@ public class DelegationTokenSecretManager
   public synchronized void cancelDelegationToken(String tokenStrForm) throws IOException {
     Token<DelegationTokenIdentifier> t= new Token<DelegationTokenIdentifier>();
     t.decodeFromUrlString(tokenStrForm);
-    String user = UserGroupInformation.getCurrentUser().getUserName();
+    String user = UserGroupInformation.getCurrentUser().getShortUserName();
     cancelToken(t, user);
   }
 
   public synchronized long renewDelegationToken(String tokenStrForm) throws IOException {
     Token<DelegationTokenIdentifier> t= new Token<DelegationTokenIdentifier>();
     t.decodeFromUrlString(tokenStrForm);
-    String user = UserGroupInformation.getCurrentUser().getUserName();
+    String user = UserGroupInformation.getCurrentUser().getShortUserName();
     return renewToken(t, user);
   }
 
