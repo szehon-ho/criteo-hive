@@ -192,7 +192,6 @@ public class MiniHiveKdc {
 	return new MiniHS2.Builder().withConf(hiveConf).withMiniKdc(hivePrincipal, hiveKeytab).
 		withAuthenticationType(authType).build();
   }
- }
  
   /*
    * Create a MiniHS2 with the hive service principal and keytab in MiniHiveKdc
