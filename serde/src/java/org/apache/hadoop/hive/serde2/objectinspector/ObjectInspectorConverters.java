@@ -371,9 +371,8 @@ public final class ObjectInspectorConverters {
         inputFields = this.inputOI.getAllStructFieldRefs();
         outputFields = outputOI.getAllStructFieldRefs();
 
-        Map<String, StructField> outputFieldsByName = new HashMap<>();
-
         //For lookup by name
+        Map<String, StructField> outputFieldsByName = new HashMap<>();
         for (StructField out : outputFields) {
           outputFieldsByName.put(out.getFieldName().toLowerCase(), out);
         }
@@ -448,6 +447,12 @@ public final class ObjectInspectorConverters {
 
     public void setResolveByName(boolean resolveByName) {
       this.resolveByName = resolveByName;
+      for (Pair<StructField, Converter> value : outputAndConverterByName.values()) {
+        Converter c = value.getSecond();
+        if (c instanceof StructConverter) {
+          ((StructConverter) c).setResolveByName(resolveByName);
+        }
+      }
     }
   }
 
