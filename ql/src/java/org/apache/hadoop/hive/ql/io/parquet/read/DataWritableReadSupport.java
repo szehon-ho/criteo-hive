@@ -118,7 +118,7 @@ public class DataWritableReadSupport extends ReadSupport<ArrayWritable> {
 
       Type fieldType = getFieldTypeIgnoreCase(schema, colName);
       if (fieldType == null) {
-        schemaTypes.add(Types.optional(PrimitiveTypeName.BINARY).named(colName));
+        //schemaTypes.add(Types.optional(PrimitiveTypeName.BINARY).named(colName));
       } else {
         schemaTypes.add(getProjectedType(colType, fieldType));
       }

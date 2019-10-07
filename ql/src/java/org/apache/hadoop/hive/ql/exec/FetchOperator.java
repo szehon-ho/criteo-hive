@@ -304,6 +304,12 @@ public class FetchOperator implements Serializable {
         ObjectInspector inputOI = currSerDe.getObjectInspector();
         ObjectConverter = ObjectInspectorConverters.getConverter(inputOI, convertedOI);
       }
+
+      if (ObjectConverter instanceof ObjectInspectorConverters.StructConverter) {
+        if (job.getBoolean(HiveConf.ConfVars.HIVE_STRUCT_EVOLUTION_ACCESS_BY_NAME.varname, false)) {
+          ((ObjectInspectorConverters.StructConverter) ObjectConverter).setResolveByName(true);
+        }
+      }
       if (isPartitioned) {
         row[1] = createPartValue(currDesc, partKeyOI);
       }

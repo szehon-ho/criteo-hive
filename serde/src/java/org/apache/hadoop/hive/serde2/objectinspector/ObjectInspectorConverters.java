@@ -19,9 +19,11 @@
 package org.apache.hadoop.hive.serde2.objectinspector;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.math3.util.Pair;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.JavaStringObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorConverter;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
@@ -40,7 +42,6 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.SettableShortObje
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.SettableTimestampObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.VoidObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.WritableStringObjectInspector;
-import org.apache.hadoop.hive.serde2.typeinfo.PrimitiveTypeInfo;
 
 /**
  * ObjectInspectorConverters.
@@ -355,18 +356,40 @@ public final class ObjectInspectorConverters {
     List<? extends StructField> inputFields;
     List<? extends StructField> outputFields;
 
-    ArrayList<Converter> fieldConverters;
+    boolean resolveByName = false;  //if input and output schemas differ, resolved struct cols by name, else resolve by index
+    ArrayList<Converter> fieldConverters = new ArrayList<>();  //used by resolve struct cols by name
+    Map<String, Pair<StructField, Converter>> outputAndConverterByName = new HashMap<>();  //used by resolve struct cols by index
 
     Object output;
 
     public StructConverter(ObjectInspector inputOI,
         SettableStructObjectInspector outputOI) {
       if (inputOI instanceof StructObjectInspector) {
+
         this.inputOI = (StructObjectInspector)inputOI;
         this.outputOI = outputOI;
         inputFields = this.inputOI.getAllStructFieldRefs();
         outputFields = outputOI.getAllStructFieldRefs();
 
+        Map<String, StructField> outputFieldsByName = new HashMap<>();
+
+        //For lookup by name
+        for (StructField out : outputFields) {
+          outputFieldsByName.put(out.getFieldName().toLowerCase(), out);
+        }
+        for (StructField in : inputFields) {
+          StructField out = outputFieldsByName.get(in.getFieldName().toLowerCase());
+          if (out != null) {
+            outputAndConverterByName.put(in.getFieldName().toLowerCase(),
+              new Pair<>(out, getConverter(in.getFieldObjectInspector(), out.getFieldObjectInspector())));
+          }
+        }
+        for (StructField in : inputFields) {
+          StructField out = outputFieldsByName.get(in.getFieldName().toLowerCase());
+          fieldConverters.add(getConverter(in.getFieldObjectInspector(), out.getFieldObjectInspector()));
+        }
+
+        //For lookup by index
         // If the output has some extra fields, set them to NULL.
         int minFields = Math.min(inputFields.size(), outputFields.size());
         fieldConverters = new ArrayList<Converter>(minFields);
@@ -389,20 +412,42 @@ public final class ObjectInspectorConverters {
         return null;
       }
 
-      int minFields = Math.min(inputFields.size(), outputFields.size());
-      // Convert the fields
-      for (int f = 0; f < minFields; f++) {
-        Object inputFieldValue = inputOI.getStructFieldData(input, inputFields.get(f));
-        Object outputFieldValue = fieldConverters.get(f).convert(inputFieldValue);
-        outputOI.setStructFieldData(output, outputFields.get(f), outputFieldValue);
-      }
+      if (resolveByName) {
+        //set all fields to null
+        for (StructField outField : outputFields) {
+          outputOI.setStructFieldData(output, outField, null);
+        }
+        //Convert and set fields by name
+        for (StructField inField : inputFields) {
+          Object inputFieldValue = inputOI.getStructFieldData(input, inField);
+          String inFieldName = inField.getFieldName().toLowerCase();
+          Pair<StructField, Converter> outputFieldAndConverter = outputAndConverterByName.get(inFieldName);
+          if (outputFieldAndConverter != null) {
+            Object outputFieldValue = outputFieldAndConverter.getSecond().convert(inputFieldValue);
+            StructField outField = outputFieldAndConverter.getFirst();
+            outputOI.setStructFieldData(output, outField, outputFieldValue);
+          }
+        }
+      } else {
+        int minFields = Math.min(inputFields.size(), outputFields.size());
+        // Convert and set fields by index
+        for (int f = 0; f < minFields; f++) {
+          Object inputFieldValue = inputOI.getStructFieldData(input, inputFields.get(f));
+          Object outputFieldValue = fieldConverters.get(f).convert(inputFieldValue);
+          outputOI.setStructFieldData(output, outputFields.get(f), outputFieldValue);
+        }
 
-      // set the extra fields to null
-      for (int f = minFields; f < outputFields.size(); f++) {
-        outputOI.setStructFieldData(output, outputFields.get(f), null);
+        //set the extra fields to null
+        for (int f = minFields; f < outputFields.size(); f++) {
+          outputOI.setStructFieldData(output, outputFields.get(f), null);
+        }
       }
 
       return output;
+    }
+
+    public void setResolveByName(boolean resolveByName) {
+      this.resolveByName = resolveByName;
     }
   }
 

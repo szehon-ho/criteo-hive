@@ -110,10 +110,6 @@ public class ParquetHiveSerDe extends AbstractSerDe {
     final String columnNameProperty = tbl.getProperty(serdeConstants.LIST_COLUMNS);
     final String columnTypeProperty = tbl.getProperty(serdeConstants.LIST_COLUMN_TYPES);
 
-    //Override on the job-conf so that the fetch operator's row reader gets the latest column types
-    conf.set(serdeConstants.LIST_COLUMNS, columnNameProperty);
-    conf.set(serdeConstants.LIST_COLUMN_TYPES, columnTypeProperty);
-
     if (columnNameProperty.length() == 0 && columnTypeProperty.length() == 0) {
         final String locationProperty = tbl.getProperty("location", null);
         Path parquetFile = locationProperty != null ? getParquetFile(conf,
