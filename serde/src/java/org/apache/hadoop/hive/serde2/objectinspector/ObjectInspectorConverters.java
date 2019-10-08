@@ -395,7 +395,9 @@ public final class ObjectInspectorConverters {
         }
         for (StructField in : inputFields) {
           StructField out = outputFieldsByName.get(in.getFieldName().toLowerCase());
-          fieldConverters.add(getConverter(in.getFieldObjectInspector(), out.getFieldObjectInspector(), conf));
+          if (out != null) {
+            fieldConverters.add(getConverter(in.getFieldObjectInspector(), out.getFieldObjectInspector(), conf));
+          }
         }
 
         //For lookup by index
