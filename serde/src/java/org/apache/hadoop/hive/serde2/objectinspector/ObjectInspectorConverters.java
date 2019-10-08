@@ -389,14 +389,9 @@ public final class ObjectInspectorConverters {
         for (StructField in : inputFields) {
           StructField out = outputFieldsByName.get(in.getFieldName().toLowerCase());
           if (out != null) {
+            Converter converter = getConverter(in.getFieldObjectInspector(), out.getFieldObjectInspector(), conf);
             outputAndConverterByName.put(in.getFieldName().toLowerCase(),
-              new Pair<>(out, getConverter(in.getFieldObjectInspector(), out.getFieldObjectInspector(), conf)));
-          }
-        }
-        for (StructField in : inputFields) {
-          StructField out = outputFieldsByName.get(in.getFieldName().toLowerCase());
-          if (out != null) {
-            fieldConverters.add(getConverter(in.getFieldObjectInspector(), out.getFieldObjectInspector(), conf));
+              new Pair<>(out, converter));
           }
         }
 
