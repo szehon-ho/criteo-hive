@@ -302,14 +302,9 @@ public class FetchOperator implements Serializable {
       } else {
         currSerDe = needConversion(currDesc) ? currDesc.getDeserializer(job) : tableSerDe;
         ObjectInspector inputOI = currSerDe.getObjectInspector();
-        ObjectConverter = ObjectInspectorConverters.getConverter(inputOI, convertedOI);
+        ObjectConverter = ObjectInspectorConverters.getConverter(inputOI, convertedOI, job);
       }
 
-      if (ObjectConverter instanceof ObjectInspectorConverters.StructConverter) {
-        if (job.getBoolean(HiveConf.ConfVars.HIVE_STRUCT_EVOLUTION_ACCESS_BY_NAME.varname, false)) {
-          ((ObjectInspectorConverters.StructConverter) ObjectConverter).setResolveByName(true);
-        }
-      }
       if (isPartitioned) {
         row[1] = createPartValue(currDesc, partKeyOI);
       }
