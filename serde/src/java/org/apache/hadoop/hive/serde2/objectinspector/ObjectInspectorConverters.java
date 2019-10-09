@@ -20,6 +20,7 @@ package org.apache.hadoop.hive.serde2.objectinspector;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -424,15 +425,21 @@ public final class ObjectInspectorConverters {
         for (StructField outField : outputFields) {
           outputOI.setStructFieldData(output, outField, null);
         }
-        //Convert and set fields by name
+        //The input providers, like the Serde, must be compatibile with resolution by name.
+        //Hence, the input will be the intersection of inputOI and outputOI schemas
+        //ie, columns in output that can be found in input
+        List<Object> inputs = inputOI.getStructFieldsDataAsList(input);
+        Iterator<Object> inIter = inputs.iterator();
         for (StructField inField : inputFields) {
-          Object inputFieldValue = inputOI.getStructFieldData(input, inField);
           String inFieldName = inField.getFieldName().toLowerCase();
           Pair<StructField, Converter> outputFieldAndConverter = outputAndConverterByName.get(inFieldName);
           if (outputFieldAndConverter != null) {
-            Object outputFieldValue = outputFieldAndConverter.getSecond().convert(inputFieldValue);
-            StructField outField = outputFieldAndConverter.getFirst();
-            outputOI.setStructFieldData(output, outField, outputFieldValue);
+            if (inIter.hasNext()) {
+              Object inputVal = inIter.next();
+              Object outputFieldValue = outputFieldAndConverter.getSecond().convert(inputVal);
+              StructField outField = outputFieldAndConverter.getFirst();
+              outputOI.setStructFieldData(output, outField, outputFieldValue);
+            }
           }
         }
       } else {
