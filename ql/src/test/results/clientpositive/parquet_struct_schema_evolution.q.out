@@ -1,0 +1,96 @@
+PREHOOK: query: -- this test creates a Parquet table with an array of structs
+create table test_schema (
+  struct_field struct<col1:string,col2:int>
+)
+partitioned by (
+  pname string
+)
+stored as parquet
+PREHOOK: type: CREATETABLE
+PREHOOK: Output: database:default
+PREHOOK: Output: default@test_schema
+POSTHOOK: query: -- this test creates a Parquet table with an array of structs
+create table test_schema (
+  struct_field struct<col1:string,col2:int>
+)
+partitioned by (
+  pname string
+)
+stored as parquet
+POSTHOOK: type: CREATETABLE
+POSTHOOK: Output: database:default
+POSTHOOK: Output: default@test_schema
+PREHOOK: query: -- insert first partition with initial schema
+insert into table test_schema partition (pname="old") select struct('a', 1)
+PREHOOK: type: QUERY
+PREHOOK: Input: _dummy_database@_dummy_table
+PREHOOK: Output: default@test_schema@pname=old
+POSTHOOK: query: -- insert first partition with initial schema
+insert into table test_schema partition (pname="old") select struct('a', 1)
+POSTHOOK: type: QUERY
+POSTHOOK: Input: _dummy_database@_dummy_table
+POSTHOOK: Output: default@test_schema@pname=old
+POSTHOOK: Lineage: test_schema PARTITION(pname=old).struct_field EXPRESSION []
+PREHOOK: query: -- table is modified to have more structs
+alter table test_schema change column struct_field struct_field struct<col0:int,col1:string,col2:int>
+PREHOOK: type: ALTERTABLE_RENAMECOL
+PREHOOK: Input: default@test_schema
+PREHOOK: Output: default@test_schema
+POSTHOOK: query: -- table is modified to have more structs
+alter table test_schema change column struct_field struct_field struct<col0:int,col1:string,col2:int>
+POSTHOOK: type: ALTERTABLE_RENAMECOL
+POSTHOOK: Input: default@test_schema
+POSTHOOK: Output: default@test_schema
+PREHOOK: query: select * from test_schema
+PREHOOK: type: QUERY
+PREHOOK: Input: default@test_schema
+PREHOOK: Input: default@test_schema@pname=old
+#### A masked pattern was here ####
+POSTHOOK: query: select * from test_schema
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@test_schema
+POSTHOOK: Input: default@test_schema@pname=old
+#### A masked pattern was here ####
+{"col0":null,"col1":"a","col2":1}	old
+PREHOOK: query: -- table is modified to have fewer structs
+alter table test_schema change column struct_field struct_field struct<col2:int>
+PREHOOK: type: ALTERTABLE_RENAMECOL
+PREHOOK: Input: default@test_schema
+PREHOOK: Output: default@test_schema
+POSTHOOK: query: -- table is modified to have fewer structs
+alter table test_schema change column struct_field struct_field struct<col2:int>
+POSTHOOK: type: ALTERTABLE_RENAMECOL
+POSTHOOK: Input: default@test_schema
+POSTHOOK: Output: default@test_schema
+PREHOOK: query: select * from test_schema
+PREHOOK: type: QUERY
+PREHOOK: Input: default@test_schema
+PREHOOK: Input: default@test_schema@pname=old
+#### A masked pattern was here ####
+POSTHOOK: query: select * from test_schema
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@test_schema
+POSTHOOK: Input: default@test_schema@pname=old
+#### A masked pattern was here ####
+{"col2":1}	old
+PREHOOK: query: -- table is modified to be equivalent to the partition structs
+alter table test_schema change column struct_field struct_field struct<col1:string,col2:int>
+PREHOOK: type: ALTERTABLE_RENAMECOL
+PREHOOK: Input: default@test_schema
+PREHOOK: Output: default@test_schema
+POSTHOOK: query: -- table is modified to be equivalent to the partition structs
+alter table test_schema change column struct_field struct_field struct<col1:string,col2:int>
+POSTHOOK: type: ALTERTABLE_RENAMECOL
+POSTHOOK: Input: default@test_schema
+POSTHOOK: Output: default@test_schema
+PREHOOK: query: select * from test_schema
+PREHOOK: type: QUERY
+PREHOOK: Input: default@test_schema
+PREHOOK: Input: default@test_schema@pname=old
+#### A masked pattern was here ####
+POSTHOOK: query: select * from test_schema
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@test_schema
+POSTHOOK: Input: default@test_schema@pname=old
+#### A masked pattern was here ####
+{"col1":"a","col2":1}	old
