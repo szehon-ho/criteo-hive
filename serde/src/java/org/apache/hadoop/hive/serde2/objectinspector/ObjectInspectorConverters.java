@@ -366,7 +366,7 @@ public final class ObjectInspectorConverters {
     List<? extends StructField> inputFields;
     List<? extends StructField> outputFields;
 
-    boolean resolveByName = false;  //if input and output schemas differ, resolved struct cols by name, else resolve by index
+    boolean resolveByName = false;  //if input and output schemas differ, resolved struct cols by name or by index
     ArrayList<Converter> fieldConverters = new ArrayList<>();  //used by resolve struct cols by name
     Map<String, Pair<StructField, Converter>> outputAndConverterByName = new HashMap<>();  //used by resolve struct cols by index
 
@@ -375,7 +375,9 @@ public final class ObjectInspectorConverters {
     public StructConverter(ObjectInspector inputOI,
         SettableStructObjectInspector outputOI, Configuration conf) {
       if (inputOI instanceof StructObjectInspector) {
-        resolveByName = conf.getBoolean(HiveConf.ConfVars.HIVE_STRUCT_EVOLUTION_ACCESS_BY_NAME.varname, false);
+        if (conf != null) {
+          resolveByName = conf.getBoolean(HiveConf.ConfVars.HIVE_STRUCT_EVOLUTION_ACCESS_BY_NAME.varname, false);
+        }
 
         this.inputOI = (StructObjectInspector)inputOI;
         this.outputOI = outputOI;
