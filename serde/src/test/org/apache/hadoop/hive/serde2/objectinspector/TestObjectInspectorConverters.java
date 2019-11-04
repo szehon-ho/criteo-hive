@@ -18,11 +18,13 @@
 package org.apache.hadoop.hive.serde2.objectinspector;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
 
 import org.apache.hadoop.hive.common.type.HiveDecimal;
+import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.serde2.io.ByteWritable;
 import org.apache.hadoop.hive.serde2.io.DoubleWritable;
 import org.apache.hadoop.hive.serde2.io.ShortWritable;
@@ -37,6 +39,9 @@ import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import parquet.example.data.simple.Primitive;
+
+import javax.security.auth.login.Configuration;
 
 /**
  * TestObjectInspectorConverters.
@@ -260,6 +265,82 @@ public class TestObjectInspectorConverters extends TestCase {
       throw e;
     }
 
+  }
+
+  public void testStructSchemaEvolution() throws Throwable {
+
+    HiveConf conf = new HiveConf();
+    conf.setBoolVar(HiveConf.ConfVars.HIVE_STRUCT_SCHEMA_CONVERSION_BY_NAME, true);
+
+    //case 1 : input has more fields than output
+    List<String> inputFields = Arrays.asList("col1", "col2", "col3");
+    List<ObjectInspector> inputOIs = Arrays.asList(new ObjectInspector[]{
+            PrimitiveObjectInspectorFactory.javaIntObjectInspector,
+            PrimitiveObjectInspectorFactory.javaStringObjectInspector,
+            PrimitiveObjectInspectorFactory.javaBooleanObjectInspector});
+
+    List<String> outputFields = Arrays.asList("col2");
+    List<ObjectInspector> outputOIs = Arrays.asList(new ObjectInspector[]{
+            PrimitiveObjectInspectorFactory.javaStringObjectInspector});
+
+    Converter structConverter = ObjectInspectorConverters.getConverter(ObjectInspectorFactory.getStandardStructObjectInspector(inputFields, inputOIs),
+            ObjectInspectorFactory.getStandardStructObjectInspector(outputFields, outputOIs), conf);
+
+    ArrayList<Object> struct1In = new ArrayList<>();
+    struct1In.add(1);
+    struct1In.add("two");
+    struct1In.add(true);
+
+    ArrayList struct1Out = (ArrayList) structConverter.convert(struct1In);
+    assertEquals(1, struct1Out.size());
+    assertEquals("two", struct1Out.get(0));
+
+
+    //case 2 : input has less fields than output
+    List<String> inputFields2 = Arrays.asList("col1", "col2");
+    List<ObjectInspector> inputOIs2 = Arrays.asList(new ObjectInspector[]{
+            PrimitiveObjectInspectorFactory.javaIntObjectInspector,
+            PrimitiveObjectInspectorFactory.javaStringObjectInspector});
+
+    List<String> outputFields2 = Arrays.asList("col0", "col1", "col2");
+    List<ObjectInspector> outputOIs2 = Arrays.asList(new ObjectInspector[]{
+            PrimitiveObjectInspectorFactory.javaBooleanObjectInspector,
+            PrimitiveObjectInspectorFactory.javaIntObjectInspector,
+            PrimitiveObjectInspectorFactory.javaStringObjectInspector});
+
+    Converter structConverter2 = ObjectInspectorConverters.getConverter(ObjectInspectorFactory.getStandardStructObjectInspector(inputFields2, inputOIs2),
+            ObjectInspectorFactory.getStandardStructObjectInspector(outputFields2, outputOIs2), conf);
+    ArrayList<Object> struct2In = new ArrayList<Object>();
+    struct2In.add(1);
+    struct2In.add("two");
+
+    ArrayList struct2Out = (ArrayList) structConverter2.convert(struct2In);
+    assertEquals(3, struct2Out.size());
+    assertEquals(null, struct2Out.get(0));
+    assertEquals(1, struct2Out.get(1));
+    assertEquals("two", struct2Out.get(2));
+
+    //case 3 : input and output have the same fields with a different ordering
+    List<String> inputFields3 = Arrays.asList("col1", "col2");
+    List<ObjectInspector> inputOIs3 = Arrays.asList(new ObjectInspector[]{
+            PrimitiveObjectInspectorFactory.javaIntObjectInspector,
+            PrimitiveObjectInspectorFactory.javaStringObjectInspector});
+
+    List<String> outputFields3 = Arrays.asList("col2", "col1");
+    List<ObjectInspector> outputOIs3 = Arrays.asList(new ObjectInspector[]{
+            PrimitiveObjectInspectorFactory.javaStringObjectInspector,
+            PrimitiveObjectInspectorFactory.javaIntObjectInspector});
+
+    Converter structConverter3 = ObjectInspectorConverters.getConverter(ObjectInspectorFactory.getStandardStructObjectInspector(inputFields3, inputOIs3),
+            ObjectInspectorFactory.getStandardStructObjectInspector(outputFields3, outputOIs3), conf);
+    ArrayList<Object> struct3In = new ArrayList<>();
+    struct3In.add(1);
+    struct3In.add("two");
+
+    ArrayList struct3Out = (ArrayList) structConverter3.convert(struct3In);
+    assertEquals(2, struct3Out.size());
+    assertEquals("two", struct3Out.get(0));
+    assertEquals(1, struct3Out.get(1));
   }
 
   public void testGetConvertedOI() throws Throwable {

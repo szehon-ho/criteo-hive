@@ -57,6 +57,7 @@ public class DataWritableReadSupport extends ReadSupport<ArrayWritable> {
 
   public static final String HIVE_TABLE_AS_PARQUET_SCHEMA = "HIVE_TABLE_SCHEMA";
   public static final String PARQUET_COLUMN_INDEX_ACCESS = "parquet.column.index.access";
+  public static final String PARQUET_COLUMN_USE_PARTITION = "parquet.column.use.partition";
   private TypeInfo hiveTypeInfo;
   /**
    * From a string which columns names (including hive column), return a list
@@ -135,7 +136,7 @@ public class DataWritableReadSupport extends ReadSupport<ArrayWritable> {
           ((StructTypeInfo) colType).getAllStructFieldNames(),
           ((StructTypeInfo) colType).getAllStructFieldTypeInfos()
         );
-  
+
         Type[] typesArray = groupFields.toArray(new Type[0]);
         return Types.buildGroup(fieldType.getRepetition())
           .addFields(typesArray)
@@ -218,16 +219,23 @@ public class DataWritableReadSupport extends ReadSupport<ArrayWritable> {
    */
   @Override
   public ReadContext init(final Configuration configuration, final Map<String, String> keyValueMetaData, final MessageType fileSchema) {
-    String columnNames = configuration.get(IOConstants.COLUMNS);
+    boolean usePartitionColumns = configuration.getBoolean(PARQUET_COLUMN_USE_PARTITION, false);
+
+    String tableColumnNames = configuration.get(IOConstants.COLUMNS);
+    String partitionColumnNames = configuration.get(IOConstants.PARTITION_COLUMNS);
+    String columnNames = usePartitionColumns ? partitionColumnNames : tableColumnNames;
     Map<String, String> contextMetadata = new HashMap<String, String>();
     boolean indexAccess = configuration.getBoolean(PARQUET_COLUMN_INDEX_ACCESS, false);
 
     if (columnNames != null) {
       List<String> columnNamesList = getColumnNames(columnNames);
-      String columnTypes = configuration.get(IOConstants.COLUMNS_TYPES);
+      String columnTypes = usePartitionColumns ?
+          configuration.get(IOConstants.PARTITION_COLUMNS_TYPES) :
+          configuration.get(IOConstants.COLUMNS_TYPES);
       List<TypeInfo> columnTypesList = getColumnTypes(columnTypes);
 
-      MessageType tableSchema;
+      // The reference schema can be either that of the table or that of the partition
+      MessageType refSchema;
       if (indexAccess) {
         List<Integer> indexSequence = new ArrayList<Integer>();
 
@@ -236,28 +244,60 @@ public class DataWritableReadSupport extends ReadSupport<ArrayWritable> {
           indexSequence.add(i);
         }
 
-        tableSchema = getSchemaByIndex(fileSchema, columnNamesList, indexSequence);
+        refSchema = getSchemaByIndex(fileSchema, columnNamesList, indexSequence);
       } else {
 
-        tableSchema = getSchemaByName(fileSchema, columnNamesList, columnTypesList);
+        refSchema = getSchemaByName(fileSchema, columnNamesList, columnTypesList);
       }
 
-      contextMetadata.put(HIVE_TABLE_AS_PARQUET_SCHEMA, tableSchema.toString());
+      contextMetadata.put(HIVE_TABLE_AS_PARQUET_SCHEMA, refSchema.toString());
       contextMetadata.put(PARQUET_COLUMN_INDEX_ACCESS, String.valueOf(indexAccess));
       this.hiveTypeInfo = TypeInfoFactory.getStructTypeInfo(columnNamesList, columnTypesList);
 
-      List<Integer> indexColumnsWanted = ColumnProjectionUtils.getReadColumnIDs(configuration);
+      List<Integer> tableIndexColumnsWanted = ColumnProjectionUtils.getReadColumnIDs(configuration);
+      List<Integer> indexColumnsWanted = usePartitionColumns ?
+          toPartitionIndexColumns(tableIndexColumnsWanted, partitionColumnNames, tableColumnNames) :
+          tableIndexColumnsWanted;
+
       if (!ColumnProjectionUtils.isReadAllColumns(configuration) && !indexColumnsWanted.isEmpty()) {
         MessageType requestedSchemaByUser =
-            getSchemaByIndex(tableSchema, columnNamesList, indexColumnsWanted);
+            getSchemaByIndex(refSchema, columnNamesList, indexColumnsWanted);
         return new ReadContext(requestedSchemaByUser, contextMetadata);
       } else {
-        return new ReadContext(tableSchema, contextMetadata);
+        return new ReadContext(refSchema, contextMetadata);
       }
     } else {
       contextMetadata.put(HIVE_TABLE_AS_PARQUET_SCHEMA, fileSchema.toString());
       return new ReadContext(fileSchema, contextMetadata);
     }
+  }
+
+  /**
+   * Converts column indices referencing the table schema into the corresponding column indices referencing the
+   * partition schema..
+   *
+   * @param tableIndexColumnsWanted The list of selected column indices from the table schema
+   * @param partitionColumns The ordered list of columns in the partition schema
+   * @param tableColumns The ordered list of columns in the table schema.
+   * @return The new list of indices that reference the partition schema.
+   */
+  private List<Integer> toPartitionIndexColumns(List<Integer> tableIndexColumnsWanted, String partitionColumns, String tableColumns) {
+    List<String> tableColumnsList = getColumnNames(tableColumns);
+    List<String> partitionColumnsList = getColumnNames(partitionColumns);
+
+    Map<String, Integer> partitionColumnIndexByName = new HashMap<>();
+    for (int i = 0; i < partitionColumnsList.size(); i++) {
+      partitionColumnIndexByName.put(partitionColumnsList.get(i), i);
+    }
+
+    List<Integer> partitionIndexColumnsWanted = new ArrayList<>();
+    for (int tableIdx : tableIndexColumnsWanted) {
+      Integer partitionIdx = partitionColumnIndexByName.get(tableColumnsList.get(tableIdx));
+      if (partitionIdx != null) {
+        partitionIndexColumnsWanted.add(partitionIdx);
+      }
+    }
+    return partitionIndexColumnsWanted;
   }
 
   /**
