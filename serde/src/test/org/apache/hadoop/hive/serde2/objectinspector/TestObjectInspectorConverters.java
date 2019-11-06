@@ -39,9 +39,6 @@ import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import parquet.example.data.simple.Primitive;
-
-import javax.security.auth.login.Configuration;
 
 /**
  * TestObjectInspectorConverters.
