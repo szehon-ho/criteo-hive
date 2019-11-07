@@ -19,9 +19,12 @@
 package org.apache.hadoop.hive.serde2.objectinspector;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.JavaStringObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorConverter;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
@@ -40,7 +43,6 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.SettableShortObje
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.SettableTimestampObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.VoidObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.WritableStringObjectInspector;
-import org.apache.hadoop.hive.serde2.typeinfo.PrimitiveTypeInfo;
 
 /**
  * ObjectInspectorConverters.
@@ -141,8 +143,12 @@ public final class ObjectInspectorConverters {
    * returned (converted) object belongs to this converter, so that it can be
    * reused across different calls.
    */
-  public static Converter getConverter(ObjectInspector inputOI,
-      ObjectInspector outputOI) {
+  public static Converter getConverter(ObjectInspector inputOI, ObjectInspector outputOI) {
+    return getConverter(inputOI, outputOI, null);
+  }
+
+  public static Converter getConverter(ObjectInspector inputOI, ObjectInspector outputOI,
+      Configuration conf) {
     // If the inputOI is the same as the outputOI, just return an
     // IdentityConverter.
     if (inputOI.equals(outputOI)) {
@@ -153,16 +159,16 @@ public final class ObjectInspectorConverters {
       return getConverter((PrimitiveObjectInspector) inputOI, (PrimitiveObjectInspector) outputOI);
     case STRUCT:
       return new StructConverter(inputOI,
-          (SettableStructObjectInspector) outputOI);
+          (SettableStructObjectInspector) outputOI, conf);
     case LIST:
       return new ListConverter(inputOI,
-          (SettableListObjectInspector) outputOI);
+          (SettableListObjectInspector) outputOI, conf);
     case MAP:
       return new MapConverter(inputOI,
-          (SettableMapObjectInspector) outputOI);
+          (SettableMapObjectInspector) outputOI, conf);
     case UNION:
       return new UnionConverter(inputOI,
-          (SettableUnionObjectInspector) outputOI);
+          (SettableUnionObjectInspector) outputOI, conf);
     default:
       throw new RuntimeException("Hive internal error: conversion of "
           + inputOI.getTypeName() + " to " + outputOI.getTypeName()
@@ -297,11 +303,12 @@ public final class ObjectInspectorConverters {
     ObjectInspector outputElementOI;
 
     ArrayList<Converter> elementConverters;
+    Configuration conf;
 
     Object output;
 
     public ListConverter(ObjectInspector inputOI,
-        SettableListObjectInspector outputOI) {
+        SettableListObjectInspector outputOI, Configuration conf) {
       if (inputOI instanceof ListObjectInspector) {
         this.inputOI = (ListObjectInspector)inputOI;
         this.outputOI = outputOI;
@@ -309,6 +316,7 @@ public final class ObjectInspectorConverters {
         outputElementOI = outputOI.getListElementObjectInspector();
         output = outputOI.create(0);
         elementConverters = new ArrayList<Converter>();
+        this.conf = conf;
       } else if (!(inputOI instanceof VoidObjectInspector)) {
         throw new RuntimeException("Hive internal error: conversion of " +
             inputOI.getTypeName() + " to " + outputOI.getTypeName() +
@@ -328,7 +336,7 @@ public final class ObjectInspectorConverters {
       // elements.
       int size = inputOI.getListLength(input);
       while (elementConverters.size() < size) {
-        elementConverters.add(getConverter(inputElementOI, outputElementOI));
+        elementConverters.add(getConverter(inputElementOI, outputElementOI, conf));
       }
 
       // Convert the elements
@@ -349,32 +357,77 @@ public final class ObjectInspectorConverters {
    */
   public static class StructConverter implements Converter {
 
+    private static class StructFieldConverter implements Converter {
+
+      int inputIndex;
+      Converter fieldTypeConverter;
+
+      public StructFieldConverter(int inputIndex, Converter fieldTypeConverter) {
+        this.inputIndex = inputIndex;
+        this.fieldTypeConverter = fieldTypeConverter;
+      }
+
+      @Override
+      public Object convert(Object input) {
+        return fieldTypeConverter.convert(input);
+      }
+    }
+
     StructObjectInspector inputOI;
     SettableStructObjectInspector outputOI;
 
     List<? extends StructField> inputFields;
     List<? extends StructField> outputFields;
 
+    // if input and output schemas differ, resolve struct cols by name or by index
+    boolean resolveByName = false;
+
     ArrayList<Converter> fieldConverters;
 
     Object output;
 
     public StructConverter(ObjectInspector inputOI,
-        SettableStructObjectInspector outputOI) {
+        SettableStructObjectInspector outputOI, Configuration conf) {
       if (inputOI instanceof StructObjectInspector) {
+        if (conf != null) {
+          resolveByName = conf.getBoolean(HiveConf.ConfVars.HIVE_STRUCT_SCHEMA_CONVERSION_BY_NAME.varname, false);
+        }
+
         this.inputOI = (StructObjectInspector)inputOI;
         this.outputOI = outputOI;
         inputFields = this.inputOI.getAllStructFieldRefs();
         outputFields = outputOI.getAllStructFieldRefs();
 
-        // If the output has some extra fields, set them to NULL.
-        int minFields = Math.min(inputFields.size(), outputFields.size());
-        fieldConverters = new ArrayList<Converter>(minFields);
-        for (int f = 0; f < minFields; f++) {
-          fieldConverters.add(getConverter(inputFields.get(f)
-              .getFieldObjectInspector(), outputFields.get(f)
-              .getFieldObjectInspector()));
+        if (resolveByName) {
+          Map<String, Integer> inputFieldIndicesByName = new HashMap<>();
+          for (int f = 0; f < inputFields.size(); f++) {
+            inputFieldIndicesByName.put(inputFields.get(f).getFieldName().toLowerCase(), f);
+          }
+
+          fieldConverters = new ArrayList<>(outputFields.size());
+          for (int f = 0; f < outputFields.size(); f++) {
+            StructField out = outputFields.get(f);
+            Integer indexInInput = inputFieldIndicesByName.get(out.getFieldName().toLowerCase());
+            if (indexInInput == null) {
+              fieldConverters.add(null);
+            }
+            else {
+              fieldConverters.add(new StructFieldConverter(indexInInput,
+                      getConverter(inputFields.get(indexInInput).getFieldObjectInspector(),
+                              outputFields.get(f).getFieldObjectInspector(), conf)));
+            }
+          }
         }
+        else {
+          // If the output has some extra fields, set them to NULL.
+          int minFields = Math.min(inputFields.size(), outputFields.size());
+          fieldConverters = new ArrayList<Converter>(minFields);
+          for (int f = 0; f < minFields; f++) {
+            fieldConverters.add(getConverter(inputFields.get(f).getFieldObjectInspector(),
+                    outputFields.get(f).getFieldObjectInspector(), conf));
+          }
+        }
+
         output = outputOI.create();
       } else if (!(inputOI instanceof VoidObjectInspector)) {
         throw new RuntimeException("Hive internal error: conversion of " +
@@ -389,17 +442,32 @@ public final class ObjectInspectorConverters {
         return null;
       }
 
-      int minFields = Math.min(inputFields.size(), outputFields.size());
-      // Convert the fields
-      for (int f = 0; f < minFields; f++) {
-        Object inputFieldValue = inputOI.getStructFieldData(input, inputFields.get(f));
-        Object outputFieldValue = fieldConverters.get(f).convert(inputFieldValue);
-        outputOI.setStructFieldData(output, outputFields.get(f), outputFieldValue);
+      if (resolveByName) {
+        for (int f = 0; f < fieldConverters.size(); f++) {
+          StructFieldConverter converter = (StructFieldConverter) fieldConverters.get(f);
+          if (converter == null) { // The field does not exist in the input
+            outputOI.setStructFieldData(output, outputFields.get(f), null);
+          }
+          else {
+            Object inputFieldValue = inputOI.getStructFieldData(input, inputFields.get(converter.inputIndex));
+            Object outputFieldValue = converter.convert(inputFieldValue);
+            outputOI.setStructFieldData(output, outputFields.get(f), outputFieldValue);
+          }
+        }
       }
+      else {
+        int minFields = Math.min(inputFields.size(), outputFields.size());
+        // Convert the fields
+        for (int f = 0; f < minFields; f++) {
+          Object inputFieldValue = inputOI.getStructFieldData(input, inputFields.get(f));
+          Object outputFieldValue = fieldConverters.get(f).convert(inputFieldValue);
+          outputOI.setStructFieldData(output, outputFields.get(f), outputFieldValue);
+        }
 
-      // set the extra fields to null
-      for (int f = minFields; f < outputFields.size(); f++) {
-        outputOI.setStructFieldData(output, outputFields.get(f), null);
+        // set the extra fields to null
+        for (int f = minFields; f < outputFields.size(); f++) {
+          outputOI.setStructFieldData(output, outputFields.get(f), null);
+        }
       }
 
       return output;
@@ -423,7 +491,7 @@ public final class ObjectInspectorConverters {
     Object output;
 
     public UnionConverter(ObjectInspector inputOI,
-        SettableUnionObjectInspector outputOI) {
+        SettableUnionObjectInspector outputOI, Configuration conf) {
       if (inputOI instanceof UnionObjectInspector) {
         this.inputOI = (UnionObjectInspector)inputOI;
         this.outputOI = outputOI;
@@ -434,7 +502,7 @@ public final class ObjectInspectorConverters {
         int minFields = Math.min(inputTagsOIs.size(), outputTagsOIs.size());
         fieldConverters = new ArrayList<Converter>(minFields);
         for (int f = 0; f < minFields; f++) {
-          fieldConverters.add(getConverter(inputTagsOIs.get(f), outputTagsOIs.get(f)));
+          fieldConverters.add(getConverter(inputTagsOIs.get(f), outputTagsOIs.get(f), conf));
         }
 
         // Create an empty output object which will be populated when convert() is invoked.
@@ -484,11 +552,12 @@ public final class ObjectInspectorConverters {
 
     ArrayList<Converter> keyConverters;
     ArrayList<Converter> valueConverters;
+    Configuration conf;
 
     Object output;
 
     public MapConverter(ObjectInspector inputOI,
-        SettableMapObjectInspector outputOI) {
+        SettableMapObjectInspector outputOI, Configuration conf) {
       if (inputOI instanceof MapObjectInspector) {
         this.inputOI = (MapObjectInspector)inputOI;
         this.outputOI = outputOI;
@@ -498,6 +567,7 @@ public final class ObjectInspectorConverters {
         outputValueOI = outputOI.getMapValueObjectInspector();
         keyConverters = new ArrayList<Converter>();
         valueConverters = new ArrayList<Converter>();
+        this.conf = conf;
         output = outputOI.create();
       } else if (!(inputOI instanceof VoidObjectInspector)) {
         throw new RuntimeException("Hive internal error: conversion of " +
@@ -525,8 +595,8 @@ public final class ObjectInspectorConverters {
       int size = map.size();
 
       while (keyConverters.size() < size) {
-        keyConverters.add(getConverter(inputKeyOI, outputKeyOI));
-        valueConverters.add(getConverter(inputValueOI, outputValueOI));
+        keyConverters.add(getConverter(inputKeyOI, outputKeyOI, conf));
+        valueConverters.add(getConverter(inputValueOI, outputValueOI, conf));
       }
 
       // CLear the output
