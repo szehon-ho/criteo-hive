@@ -135,7 +135,6 @@ public class DataWritableReadSupport extends ReadSupport<ArrayWritable> {
           ((StructTypeInfo) colType).getAllStructFieldNames(),
           ((StructTypeInfo) colType).getAllStructFieldTypeInfos()
         );
-
         Type[] typesArray = groupFields.toArray(new Type[0]);
         return Types.buildGroup(fieldType.getRepetition())
           .addFields(typesArray)
@@ -227,7 +226,6 @@ public class DataWritableReadSupport extends ReadSupport<ArrayWritable> {
       String columnTypes = configuration.get(IOConstants.COLUMNS_TYPES);
       List<TypeInfo> columnTypesList = getColumnTypes(columnTypes);
 
-      // The reference schema can be either that of the table or that of the partition
       MessageType tableSchema;
       if (indexAccess) {
         List<Integer> indexSequence = new ArrayList<Integer>();
@@ -248,7 +246,6 @@ public class DataWritableReadSupport extends ReadSupport<ArrayWritable> {
       this.hiveTypeInfo = TypeInfoFactory.getStructTypeInfo(columnNamesList, columnTypesList);
 
       List<Integer> indexColumnsWanted = ColumnProjectionUtils.getReadColumnIDs(configuration);
-
       if (!ColumnProjectionUtils.isReadAllColumns(configuration) && !indexColumnsWanted.isEmpty()) {
         MessageType requestedSchemaByUser =
             getSchemaByIndex(tableSchema, columnNamesList, indexColumnsWanted);
