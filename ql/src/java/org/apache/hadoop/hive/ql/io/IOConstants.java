@@ -23,9 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 
 public final class IOConstants {
   public static final String COLUMNS = "columns";
-  public static final String PARTITION_COLUMNS = "partition.columns";
   public static final String COLUMNS_TYPES = "columns.types";
-  public static final String PARTITION_COLUMNS_TYPES = "partition.columns.types";
   public static final String MAPRED_TASK_ID = "mapred.task.id";
 
   public static final String TEXTFILE = "TEXTFILE";

@@ -2,7 +2,6 @@
 -- config is set then the matching can be done by name
 
 SET hive.struct.schema.name.access=true;
-SET parquet.column.use.partition=true;
 
 DROP TABLE parquet_schema_evolution_by_name;
 DROP TABLE parquet_schema_evolution_by_name_struct;

@@ -43,7 +43,6 @@ import org.apache.hadoop.hive.ql.io.AcidUtils;
 import org.apache.hadoop.hive.ql.io.HiveContextAwareRecordReader;
 import org.apache.hadoop.hive.ql.io.HiveInputFormat;
 import org.apache.hadoop.hive.ql.io.HiveRecordReader;
-import org.apache.hadoop.hive.ql.io.IOConstants;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.ql.metadata.VirtualColumn;
 import org.apache.hadoop.hive.ql.parse.SplitSample;
@@ -51,7 +50,6 @@ import org.apache.hadoop.hive.ql.plan.FetchWork;
 import org.apache.hadoop.hive.ql.plan.PartitionDesc;
 import org.apache.hadoop.hive.ql.plan.TableDesc;
 import org.apache.hadoop.hive.ql.session.SessionState.LogHelper;
-import org.apache.hadoop.hive.serde.serdeConstants;
 import org.apache.hadoop.hive.serde2.Deserializer;
 import org.apache.hadoop.hive.serde2.SerDeSpec;
 import org.apache.hadoop.hive.serde2.objectinspector.InspectableObject;
@@ -306,10 +304,6 @@ public class FetchOperator implements Serializable {
         ObjectInspector inputOI = currSerDe.getObjectInspector();
         ObjectConverter = ObjectInspectorConverters.getConverter(inputOI, convertedOI, job);
 
-        job.set(IOConstants.PARTITION_COLUMNS,
-                currDesc.getProperties().getProperty(serdeConstants.LIST_COLUMNS));
-        job.set(IOConstants.PARTITION_COLUMNS_TYPES,
-                currDesc.getProperties().getProperty(serdeConstants.LIST_COLUMN_TYPES));
       }
       if (isPartitioned) {
         row[1] = createPartValue(currDesc, partKeyOI);
