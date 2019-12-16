@@ -306,10 +306,6 @@ public class FetchOperator implements Serializable {
         ObjectInspector inputOI = currSerDe.getObjectInspector();
         ObjectConverter = ObjectInspectorConverters.getConverter(inputOI, convertedOI, job);
 
-        job.set(IOConstants.PARTITION_COLUMNS,
-                currDesc.getProperties().getProperty(serdeConstants.LIST_COLUMNS));
-        job.set(IOConstants.PARTITION_COLUMNS_TYPES,
-                currDesc.getProperties().getProperty(serdeConstants.LIST_COLUMN_TYPES));
       }
       if (isPartitioned) {
         row[1] = createPartValue(currDesc, partKeyOI);

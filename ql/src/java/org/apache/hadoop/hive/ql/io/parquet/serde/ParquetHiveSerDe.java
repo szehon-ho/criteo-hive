@@ -22,8 +22,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.ql.io.parquet.convert.ParquetSchemaReader;
 import org.apache.hadoop.hive.ql.io.parquet.convert.ParquetToHiveSchemaConverter;
+import org.apache.hadoop.hive.ql.metadata.VirtualColumn;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorConverters;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorConverters.Converter;
 //
 // END blind imports
 
@@ -51,8 +55,8 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils;
 import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.util.StringUtils;
 import parquet.hadoop.ParquetOutputFormat;
-import parquet.hadoop.ParquetWriter;
 
 /**
  *
@@ -82,6 +86,7 @@ public class ParquetHiveSerDe extends AbstractSerDe {
 
   private SerDeStats stats;
   private ObjectInspector objInspector;
+  private Converter tableToPartitionConverter;
 
   private enum LAST_OPERATION {
     SERIALIZE,
@@ -171,10 +176,52 @@ public class ParquetHiveSerDe extends AbstractSerDe {
     rowTypeInfo = TypeInfoFactory.getStructTypeInfo(columnNames, columnTypes);
     this.objInspector = new ArrayWritableObjectInspector((StructTypeInfo) rowTypeInfo);
 
+    boolean resolveByName = conf.getBoolean(HiveConf.ConfVars.HIVE_STRUCT_SCHEMA_CONVERSION_BY_NAME.varname, false);
+    if (resolveByName) {
+      ObjectInspector tableOI = getTableObjectInspector(conf);
+      if (tableOI != null) {
+        this.tableToPartitionConverter = ObjectInspectorConverters.getConverter(tableOI, objInspector, conf);
+      }
+      else {
+        this.tableToPartitionConverter = new ObjectInspectorConverters.IdentityConverter();
+      }
+    }
+    else {
+      this.tableToPartitionConverter = new ObjectInspectorConverters.IdentityConverter();
+    }
+
     // Stats part
     serializedSize = 0;
     deserializedSize = 0;
     status = LAST_OPERATION.UNKNOWN;
+  }
+
+  private ObjectInspector getTableObjectInspector(final Configuration conf) {
+    List<String> columnNames;
+    List<TypeInfo> columnTypes;
+    final String columnNameProperty = conf.get(serdeConstants.LIST_COLUMNS);
+    final String columnTypeProperty = conf.get(serdeConstants.LIST_COLUMN_TYPES);
+
+    if (columnNameProperty != null && columnTypeProperty != null) {
+
+      if (columnNameProperty.length() == 0) {
+        columnNames = new ArrayList<>();
+      } else {
+        columnNames = (List<String>) VirtualColumn.
+                removeVirtualColumns(StringUtils.getStringCollection(columnNameProperty));
+      }
+      if (columnNames.size() == 0) {
+        columnTypes = new ArrayList<>();
+      } else {
+        columnTypes = TypeInfoUtils.getTypeInfosFromTypeString(columnTypeProperty);
+      }
+
+      TypeInfo tableTypeInfo = TypeInfoFactory.getStructTypeInfo(columnNames, columnTypes);
+      return new ArrayWritableObjectInspector((StructTypeInfo) tableTypeInfo);
+    }
+    else {
+      return null;
+    }
   }
 
   @Override
@@ -183,7 +230,7 @@ public class ParquetHiveSerDe extends AbstractSerDe {
     deserializedSize = 0;
     if (blob instanceof ArrayWritable) {
       deserializedSize = ((ArrayWritable) blob).get().length;
-      return blob;
+      return tableToPartitionConverter.convert(blob);
     } else {
       return null;
     }

@@ -197,7 +197,7 @@ public class MapOperator extends Operator<MapWork> implements Serializable, Clon
         (StructObjectInspector) opCtx.deserializer.getObjectInspector();
 
     opCtx.partTblObjectInspectorConverter =
-        ObjectInspectorConverters.getConverter(partRawRowObjectInspector, tableRowOI);
+        ObjectInspectorConverters.getConverter(partRawRowObjectInspector, tableRowOI, hconf);
 
     // Next check if this table has partitions and if so
     // get the list of partition names as well as allocate
