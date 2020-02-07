@@ -5730,7 +5730,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
 
     @Override
     public String get_token(String token_identifier) throws TException {
-      startFunction("get_token for", ": " + token_identifier);
+      startFunction("get_token", "for: " + token_identifier);
       String ret = null;
       Exception ex = null;
       try {
