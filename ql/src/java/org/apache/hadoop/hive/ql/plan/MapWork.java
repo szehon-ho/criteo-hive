@@ -32,6 +32,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.ql.exec.FileSinkOperator;
@@ -59,8 +60,6 @@ import com.google.common.collect.Interner;
  */
 @SuppressWarnings({"serial", "deprecation"})
 public class MapWork extends BaseWork {
-
-  private static final Log LOG = LogFactory.getLog(MapWork.class);
 
   // use LinkedHashMap to make sure the iteration order is
   // deterministic, to ease testing
@@ -497,17 +496,6 @@ public class MapWork extends BaseWork {
     Collection<Operator<?>> mappers = aliasToWork.values();
     for (FileSinkOperator fs : OperatorUtils.findOperators(mappers, FileSinkOperator.class)) {
       PlanUtils.configureJobConf(fs.getConf().getTableInfo(), job);
-    }
-  }
-
-  public void logPathToAliases() {
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("LOGGING PATH TO ALIASES");
-      for (Map.Entry<String, ArrayList<String>> entry: pathToAliases.entrySet()) {
-        for (String a: entry.getValue()) {
-          LOG.debug("Path: " + entry.getKey() + ", Alias: " + a);
-        }
-      }
     }
   }
 

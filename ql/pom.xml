@@ -85,8 +85,8 @@
     </dependency>
     <!-- inter-project -->
     <dependency>
-      <groupId>com.esotericsoftware.kryo</groupId>
-      <artifactId>kryo</artifactId>
+      <groupId>com.esotericsoftware</groupId>
+      <artifactId>kryo-shaded</artifactId>
       <version>${kryo.version}</version>
     </dependency>
     <dependency>
@@ -109,9 +109,9 @@
       <version>${commons-io.version}</version>
     </dependency>
     <dependency>
-       <groupId>org.apache.commons</groupId>
-       <artifactId>commons-lang3</artifactId>
-       <version>${commons-lang3.version}</version>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons-lang3.version}</version>
     </dependency>
     <dependency>
       <groupId>org.cloudera.logredactor</groupId>
@@ -206,7 +206,7 @@
       <version>${curator.version}</version>
     </dependency>
     <dependency>
-    <groupId>org.apache.curator</groupId>
+      <groupId>org.apache.curator</groupId>
       <artifactId>apache-curator</artifactId>
       <version>${curator.version}</version>
       <type>pom</type>
@@ -259,7 +259,7 @@
           <artifactId>jackson-databind</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>   
+    </dependency>
     <dependency>
       <groupId>org.apache.calcite</groupId>
       <artifactId>calcite-avatica</artifactId>
@@ -369,14 +369,14 @@
           <groupId>org.apache.hadoop</groupId>
           <artifactId>hadoop-hdfs</artifactId>
         </exclusion>
-       <exclusion>
-         <groupId>org.apache.hadoop</groupId>
-         <artifactId>hadoop-yarn-client</artifactId>
-       </exclusion>
-       <exclusion>
-         <groupId>javax.servlet</groupId>
-         <artifactId>servlet-api</artifactId>
-       </exclusion>
+        <exclusion>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-yarn-client</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.servlet</groupId>
+          <artifactId>servlet-api</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -405,10 +405,10 @@
           <groupId>org.apache.hadoop</groupId>
           <artifactId>hadoop-hdfs</artifactId>
         </exclusion>
-       <exclusion>
-         <groupId>org.apache.hadoop</groupId>
-         <artifactId>hadoop-yarn-client</artifactId>
-       </exclusion>
+        <exclusion>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-yarn-client</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -437,10 +437,10 @@
           <groupId>org.apache.hadoop</groupId>
           <artifactId>hadoop-hdfs</artifactId>
         </exclusion>
-       <exclusion>
-         <groupId>org.apache.hadoop</groupId>
-         <artifactId>hadoop-yarn-client</artifactId>
-       </exclusion>
+        <exclusion>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-yarn-client</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -469,17 +469,11 @@
           <groupId>org.apache.hadoop</groupId>
           <artifactId>hadoop-hdfs</artifactId>
         </exclusion>
-       <exclusion>
-         <groupId>org.apache.hadoop</groupId>
-         <artifactId>hadoop-yarn-client</artifactId>
-       </exclusion>
+        <exclusion>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-yarn-client</artifactId>
+        </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-core_${scala.binary.version}</artifactId>
-      <version>${spark.version}</version>
-      <optional>true</optional>
     </dependency>
     <!-- Following have only one version, which is cdh.hadoop.version -->
     <dependency>
@@ -487,6 +481,26 @@
       <artifactId>hadoop-common</artifactId>
       <version>${hadoop-23.version}</version>
       <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-core_${scala.binary.version}</artifactId>
+      <version>${spark.version}</version>
+      <optional>true</optional>
+      <exclusions>
+        <exclusion>
+          <groupId>com.esotericsoftware.kryo</groupId>
+          <artifactId>kryo</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>commmons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.sun.jersey</groupId>
@@ -536,7 +550,7 @@
           <groupId>org.apache.hadoop</groupId>
           <artifactId>hadoop-core</artifactId>
           <version>${hadoop-20S.version}</version>
-         <optional>true</optional>
+          <optional>true</optional>
         </dependency>
         <dependency>
           <groupId>org.apache.hadoop</groupId>
@@ -584,19 +598,19 @@
           <artifactId>hadoop-yarn-api</artifactId>
           <version>${hadoop-23.version}</version>
           <optional>true</optional>
-       </dependency>
-       <dependency>
-         <groupId>org.apache.hadoop</groupId>
-         <artifactId>hadoop-yarn-common</artifactId>
-         <version>${hadoop-23.version}</version>
-         <optional>true</optional>
-       </dependency>
-       <dependency>
-         <groupId>org.apache.hadoop</groupId>
-         <artifactId>hadoop-yarn-client</artifactId>
-         <version>${hadoop-23.version}</version>
-         <optional>true</optional>
-       </dependency>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-yarn-common</artifactId>
+          <version>${hadoop-23.version}</version>
+          <optional>true</optional>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-yarn-client</artifactId>
+          <version>${hadoop-23.version}</version>
+          <optional>true</optional>
+        </dependency>
         <dependency>
           <groupId>org.apache.hbase</groupId>
           <artifactId>hbase-common</artifactId>
@@ -673,7 +687,7 @@
               <target>
                 <property name="compile.classpath" refid="maven.compile.classpath"/>
                 <taskdef name="vectorcodegen" classname="org.apache.hadoop.hive.ant.GenVectorCode"
-                    classpath="${compile.classpath}"/>
+                         classpath="${compile.classpath}"/>
                 <mkdir dir="${project.build.directory}/generated-sources/java/org/apache/hadoop/hive/ql/exec/vector/expressions/gen/"/>
                 <mkdir dir="${project.build.directory}/generated-sources/java/org/apache/hadoop/hive/ql/exec/vector/expressions/aggregates/gen/"/>
                 <mkdir dir="${project.build.directory}/generated-test-sources/java/org/apache/hadoop/hive/ql/exec/vector/expressions/gen/"/>
@@ -728,7 +742,7 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-                <!--also see maven-jar-plugin execution.id=core-jar-->
+              <!--also see maven-jar-plugin execution.id=core-jar-->
               <artifactSet>
                 <includes>
                   <!-- order is meant to be the same as the ant build -->
@@ -737,6 +751,12 @@
                   <include>org.apache.hive:hive-serde</include>
                   <include>com.esotericsoftware.kryo:kryo</include>
                   <include>com.twitter:parquet-hadoop-bundle</include>
+                  <include>org.apache.hive:hive-llap-client</include>
+                  <include>org.apache.hive:hive-metastore</include>
+                  <include>com.esotericsoftware:kryo-shaded</include>
+                  <include>com.esotericsoftware:minlog</include>
+                  <include>org.objenesis:objenesis</include>
+                  <include>org.apache.parquet:parquet-hadoop-bundle</include>
                   <include>org.apache.thrift:libthrift</include>
                   <include>commons-lang:commons-lang</include>
                   <include>org.apache.commons:commons-lang3</include>
@@ -764,6 +784,10 @@
                 <relocation>
                   <pattern>com.esotericsoftware</pattern>
                   <shadedPattern>org.apache.hive.com.esotericsoftware</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.objenesis</pattern>
+                  <shadedPattern>org.apache.hive.org.objenesis</shadedPattern>
                 </relocation>
               </relocations>
             </configuration>

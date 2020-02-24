@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hive.ql.exec.FileSinkOperator;
 import org.apache.hadoop.hive.ql.exec.Operator;
 import org.apache.hadoop.hive.ql.exec.OperatorUtils;
@@ -61,8 +59,6 @@ public class ReduceWork extends BaseWork {
   public ReduceWork(String name) {
     super(name);
   }
-
-  private static transient final Log LOG = LogFactory.getLog(ReduceWork.class);
 
   // schema of the map-reduce 'key' object - this is homogeneous
   private TableDesc keyDesc;
