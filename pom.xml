@@ -380,6 +380,13 @@
         <artifactId>jline</artifactId>
         <version>${jline.version}</version>
       </dependency>
+      <!-- Force this version to be 2.8.1 -->
+      <!-- If not specified, maven revolves it to 1.6 -->
+      <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>${joda.version}</version>
+      </dependency>
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
