@@ -191,7 +191,11 @@ public class ParquetHiveSerDe extends AbstractSerDe {
         List<String> prunedColumnPaths = processRawPrunedPaths(rawPrunedColumnPaths);
         prunedTypeInfo = pruneFromPaths(completeTypeInfo, prunedColumnPaths);
       }
+    }
 
+    this.objInspector = new ArrayWritableObjectInspector(completeTypeInfo, prunedTypeInfo);
+
+    if (conf != null) {
       boolean resolveByName = conf.getBoolean(ConfVars.HIVE_STRUCT_SCHEMA_CONVERSION_BY_NAME.varname, false);
       if (resolveByName) {
         ObjectInspector tableOI = getTableObjectInspector(conf);
@@ -201,7 +205,6 @@ public class ParquetHiveSerDe extends AbstractSerDe {
       }
     }
 
-    this.objInspector = new ArrayWritableObjectInspector(completeTypeInfo, prunedTypeInfo);
     if (this.tableToPartitionConverter == null) {
       this.tableToPartitionConverter = new ObjectInspectorConverters.IdentityConverter();
     }
