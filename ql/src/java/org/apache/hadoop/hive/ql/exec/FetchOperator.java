@@ -311,7 +311,7 @@ public class FetchOperator implements Serializable {
       } else {
         currSerDe = needConversion(currDesc) ? currDesc.getDeserializer(job) : tableSerDe;
         ObjectInspector inputOI = currSerDe.getObjectInspector();
-        ObjectConverter = ObjectInspectorConverters.getConverter(inputOI, convertedOI);
+        ObjectConverter = ObjectInspectorConverters.getConverter(inputOI, convertedOI, job);
       }
       if (isPartitioned) {
         row[1] = createPartValue(currDesc, partKeyOI);
