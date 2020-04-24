@@ -162,13 +162,20 @@ public class HiveServer2 extends CompositeService {
       LlapRegistryService.getClient(hiveConf);
     }
 
-    // Create views registry
-    try {
-      Hive sessionHive = Hive.get(hiveConf);
-      HiveMaterializedViewsRegistry.get().init(sessionHive);
-    } catch (HiveException e) {
-      throw new RuntimeException("Failed to get metastore connection", e);
+    boolean loadMaterializedViewsOnStartup = hiveConf.getBoolVar(ConfVars.HIVE_MATERIALIZED_VIEW_ENABLE_AUTO_REWRITING);
+    if (loadMaterializedViewsOnStartup) {
+      // Create views registry
+      LOG.info("Loading materialized views from the metastore");
+      try {
+        Hive sessionHive = Hive.get(hiveConf);
+        HiveMaterializedViewsRegistry.get().init(sessionHive);
+      } catch (HiveException e) {
+        throw new RuntimeException("Failed to get metastore connection", e);
+      }
+    } else {
+      LOG.info("Skip loading materialized views from the metastore");
     }
+
     // Setup web UI
     try {
       int webUIPort =
