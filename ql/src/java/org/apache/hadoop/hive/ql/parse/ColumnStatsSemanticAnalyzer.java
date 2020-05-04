@@ -264,7 +264,16 @@ public class ColumnStatsSemanticAnalyzer extends SemanticAnalyzer {
 
     if (isPartitionStats) {
       for (FieldSchema fs : tbl.getPartCols()) {
-        rewrittenQueryBuilder.append(" , `" + fs.getName() + "`");
+        String fieldName = fs.getName();
+        if (partSpec.containsKey(fieldName)) {
+          rewrittenQueryBuilder.append(" , '");
+          rewrittenQueryBuilder.append(partSpec.get(fieldName));
+          rewrittenQueryBuilder.append("' as `");
+          rewrittenQueryBuilder.append(fieldName);
+          rewrittenQueryBuilder.append("`");
+        } else {
+          rewrittenQueryBuilder.append(" , `" + fieldName + "`");
+        }
       }
     }
     rewrittenQueryBuilder.append(" from `");
