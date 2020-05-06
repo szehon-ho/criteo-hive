@@ -6155,7 +6155,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         throw newMetaException(e);
       } finally {
-        endFunction("get_database", func != null, ex);
+        endFunction("get_function", func != null, ex);
       }
 
       return func;
