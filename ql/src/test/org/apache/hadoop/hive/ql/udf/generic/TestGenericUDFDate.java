@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.hadoop.hive.ql.udf;
+package org.apache.hadoop.hive.ql.udf.generic;
 
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -42,13 +42,13 @@ public class TestGenericUDFDate extends TestCase {
     udf.initialize(arguments);
     DeferredObject valueObj = new DeferredJavaObject(new Text("2009-07-30"));
     DeferredObject[] args = {valueObj};
-    Text output = (Text) udf.evaluate(args);
+    DateWritable output = (DateWritable) udf.evaluate(args);
 
     assertEquals("to_date() test for STRING failed ", "2009-07-30", output.toString());
 
     // Try with null args
-    DeferredObject[] nullArgs = { new DeferredJavaObject(null) };
-    output = (Text) udf.evaluate(nullArgs);
+    DeferredObject[] nullArgs = {new DeferredJavaObject(null)};
+    output = (DateWritable) udf.evaluate(nullArgs);
     assertNull("to_date() with null STRING", output);
   }
 
@@ -61,13 +61,13 @@ public class TestGenericUDFDate extends TestCase {
     DeferredObject valueObj = new DeferredJavaObject(new TimestampWritable(new Timestamp(109, 06,
         30, 4, 17, 52, 0)));
     DeferredObject[] args = {valueObj};
-    Text output = (Text) udf.evaluate(args);
+    DateWritable output = (DateWritable) udf.evaluate(args);
 
     assertEquals("to_date() test for TIMESTAMP failed ", "2009-07-30", output.toString());
 
     // Try with null args
-    DeferredObject[] nullArgs = { new DeferredJavaObject(null) };
-    output = (Text) udf.evaluate(nullArgs);
+    DeferredObject[] nullArgs = {new DeferredJavaObject(null)};
+    output = (DateWritable) udf.evaluate(nullArgs);
     assertNull("to_date() with null TIMESTAMP", output);
   }
 
@@ -79,14 +79,13 @@ public class TestGenericUDFDate extends TestCase {
     udf.initialize(arguments);
     DeferredObject valueObj = new DeferredJavaObject(new DateWritable(new Date(109, 06, 30)));
     DeferredObject[] args = {valueObj};
-    Text output = (Text) udf.evaluate(args);
+    DateWritable output = (DateWritable) udf.evaluate(args);
 
     assertEquals("to_date() test for DATEWRITABLE failed ", "2009-07-30", output.toString());
 
     // Try with null args
-    DeferredObject[] nullArgs = { new DeferredJavaObject(null) };
-    output = (Text) udf.evaluate(nullArgs);
+    DeferredObject[] nullArgs = {new DeferredJavaObject(null)};
+    output = (DateWritable) udf.evaluate(nullArgs);
     assertNull("to_date() with null DATE", output);
   }
-
 }
