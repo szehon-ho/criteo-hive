@@ -28,7 +28,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -41,6 +41,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Predicates;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import org.apache.commons.lang.StringUtils;
@@ -306,14 +307,21 @@ public class MetaStoreUtils {
     return !isFastStatsSame(oldPart, newPart);
   }
 
+  /**
+   * Determines whether the "fast stats" for the passed partitions are the same.
+   *
+   * @param oldPart Old partition to compare.
+   * @param newPart New partition to compare.
+   * @return true if the partitions are not null, contain all the "fast stats" and have the same values for these stats, otherwise false.
+   */
   static boolean isFastStatsSame(Partition oldPart, Partition newPart) {
     // requires to calculate stats if new and old have different fast stats
     if ((oldPart != null) && (oldPart.getParameters() != null)) {
       for (String stat : StatsSetupConst.fastStats) {
         if (oldPart.getParameters().containsKey(stat)) {
           Long oldStat = Long.parseLong(oldPart.getParameters().get(stat));
-          Long newStat = Long.parseLong(newPart.getParameters().get(stat));
-          if (!oldStat.equals(newStat)) {
+          String newStat = newPart.getParameters().get(stat);
+          if (newStat == null || !oldStat.equals(Long.parseLong(newStat))) {
             return false;
           }
         } else {
@@ -1856,14 +1864,26 @@ public class MetaStoreUtils {
   }
 
   /**
+   * Returns currently known class paths as best effort. For system class loader, this may return empty.
+   * In such cases we will anyway create new child class loader in {@link #addToClassPath(ClassLoader, String[])},
+   * so all new class paths will be added and next time we will have a URLClassLoader to work with.
+   */
+  private static List<URL> getCurrentClassPaths(ClassLoader parentLoader) {
+    if(parentLoader instanceof URLClassLoader) {
+      return Lists.newArrayList(((URLClassLoader) parentLoader).getURLs());
+    } else {
+      return Collections.emptyList();
+    }
+  }
+
+  /**
    * Add new elements to the classpath.
    *
    * @param newPaths
    *          Array of classpath elements
    */
   public static ClassLoader addToClassPath(ClassLoader cloader, String[] newPaths) throws Exception {
-    URLClassLoader loader = (URLClassLoader) cloader;
-    List<URL> curPath = Arrays.asList(loader.getURLs());
+    List<URL> curPath = getCurrentClassPaths(cloader);
     ArrayList<URL> newPath = new ArrayList<URL>();
 
     // get a list with the current classpath components
@@ -1879,7 +1899,7 @@ public class MetaStoreUtils {
       }
     }
 
-    return new URLClassLoader(curPath.toArray(new URL[0]), loader);
+    return new URLClassLoader(curPath.toArray(new URL[0]), cloader);
   }
 
   public static String encodeTableName(String name) {

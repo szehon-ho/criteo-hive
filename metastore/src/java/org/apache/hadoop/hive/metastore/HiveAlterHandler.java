@@ -54,8 +54,10 @@ import org.apache.hive.common.util.HiveStringUtils;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Hive specific implementation of alter
@@ -115,8 +117,12 @@ public class HiveAlterHandler implements AlterHandler {
     boolean rename = false;
     Table oldt = null;
     List<MetaStoreEventListener> transactionalListeners = null;
+    List<MetaStoreEventListener> listeners = null;
+    Map<String, String> txnAlterTableEventResponses = Collections.emptyMap();
+
     if (handler != null) {
       transactionalListeners = handler.getTransactionalListeners();
+      listeners = handler.getListeners();
     }
 
     try {
@@ -140,9 +146,12 @@ public class HiveAlterHandler implements AlterHandler {
         throw new InvalidOperationException("table " + dbname + "." + name + " doesn't exist");
       }
 
-      if (HiveConf.getBoolVar(hiveConf,
-            HiveConf.ConfVars.METASTORE_DISALLOW_INCOMPATIBLE_COL_TYPE_CHANGES,
-            false)) {
+      // Views derive the column type from the base table definition.  So the view definition
+      // can be altered to change the column types.  The column type compatibility checks should
+      // be done only for non-views.
+      if (HiveConf
+          .getBoolVar(hiveConf, HiveConf.ConfVars.METASTORE_DISALLOW_INCOMPATIBLE_COL_TYPE_CHANGES,
+              false) && !oldt.getTableType().equals(TableType.VIRTUAL_VIEW.toString())) {
         // Throws InvalidOperationException if the new column types are not
         // compatible with the current column types.
         MetaStoreUtils.throwExceptionIfIncompatibleColTypeChange(
@@ -270,7 +279,7 @@ public class HiveAlterHandler implements AlterHandler {
 
       alterTableUpdateTableColumnStats(msdb, oldt, newt);
       if (transactionalListeners != null && !transactionalListeners.isEmpty()) {
-        MetaStoreListenerNotifier.notifyEvent(transactionalListeners,
+        txnAlterTableEventResponses = MetaStoreListenerNotifier.notifyEvent(transactionalListeners,
                                               EventMessage.EventType.ALTER_TABLE,
                                               new AlterTableEvent(oldt, newt, true, handler),
                                               environmentContext);
@@ -304,6 +313,12 @@ public class HiveAlterHandler implements AlterHandler {
                 +  " in alter table failure. Manual restore is needed.");
           }
         }
+      }
+
+      if (!listeners.isEmpty()) {
+        MetaStoreListenerNotifier.notifyEvent(listeners, EventMessage.EventType.ALTER_TABLE,
+            new AlterTableEvent(oldt, newt, success, handler),
+            environmentContext, txnAlterTableEventResponses, msdb);
       }
     }
   }
