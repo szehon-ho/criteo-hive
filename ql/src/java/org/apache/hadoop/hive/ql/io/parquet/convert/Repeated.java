@@ -149,13 +149,12 @@ public interface Repeated extends ConverterParent {
     private final List<Writable> list = new ArrayList<Writable>();
     private final Map<String, String> metadata = new HashMap<String, String>();
 
-
-    public RepeatedGroupConverter(GroupType groupType, ConverterParent parent, int index, TypeInfo hiveTypeInfo) {
+    public RepeatedGroupConverter(GroupType groupType, GroupType containingGroupType, ConverterParent parent, int index, TypeInfo hiveTypeInfo) {
       setMetadata(parent.getMetadata());
       this.groupType = groupType;
       this.parent = parent;
       this.index = index;
-      this.wrapped = HiveGroupConverter.getConverterFromDescription(groupType, 0, this, hiveTypeInfo);
+      this.wrapped = HiveGroupConverter.getConverterFromDescription(groupType, containingGroupType, 0, this, hiveTypeInfo);
     }
 
     @Override

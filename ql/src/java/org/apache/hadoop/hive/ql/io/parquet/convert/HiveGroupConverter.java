@@ -46,7 +46,8 @@ public abstract class HiveGroupConverter extends GroupConverter implements Conve
     return ETypeConverter.getNewConverter(type, index, parent, hiveTypeInfo);
   }
 
-  protected static HiveGroupConverter getConverterFromDescription(GroupType type, int index, ConverterParent parent,
+  protected static HiveGroupConverter getConverterFromDescription(GroupType type, GroupType containingGroupType,
+                                                                  int index, ConverterParent parent,
                                                                   TypeInfo hiveTypeInfo) {
     if (type == null) {
       return null;
@@ -59,10 +60,23 @@ public abstract class HiveGroupConverter extends GroupConverter implements Conve
       return HiveCollectionConverter.forMap(type, parent, index, hiveTypeInfo);
     }
 
-    return new HiveStructConverter(type, parent, index, hiveTypeInfo);
+    if (containingGroupType == null) {
+      return new HiveStructConverter(type, parent, index, hiveTypeInfo);
+    }
+    else {
+      return new HiveStructConverter(type, parent, index, containingGroupType, hiveTypeInfo);
+    }
   }
 
-  protected static Converter getConverterFromDescription(Type type, int index, ConverterParent parent, TypeInfo hiveTypeInfo) {
+  protected static Converter getConverterFromDescription(Type type,
+                                                         int index, ConverterParent parent,
+                                                         TypeInfo hiveTypeInfo) {
+    return getConverterFromDescription(type, type, index, parent, hiveTypeInfo);
+  }
+
+  protected static Converter getConverterFromDescription(Type type, Type containingGroupType,
+                                                         int index, ConverterParent parent,
+                                                         TypeInfo hiveTypeInfo) {
     if (type == null) {
       return null;
     }
@@ -71,7 +85,7 @@ public abstract class HiveGroupConverter extends GroupConverter implements Conve
       return getConverterFromDescription(type.asPrimitiveType(), index, parent, hiveTypeInfo);
     }
 
-    return getConverterFromDescription(type.asGroupType(), index, parent, hiveTypeInfo);
+    return getConverterFromDescription(type.asGroupType(), containingGroupType.asGroupType(), index, parent, hiveTypeInfo);
   }
 
   public abstract void set(int index, Writable value);
