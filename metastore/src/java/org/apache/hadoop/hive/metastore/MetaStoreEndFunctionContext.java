@@ -58,4 +58,8 @@ public class MetaStoreEndFunctionContext {
     return inputTableName;
   }
 
+  public String getInputDbName() {
+    return inputDbName;
+  }
+
 }
