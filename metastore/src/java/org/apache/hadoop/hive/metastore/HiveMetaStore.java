@@ -874,7 +874,12 @@ public class HiveMetaStore extends ThriftHiveMetastore {
     }
     private void endFunction(String function, boolean successful, Exception e,
                             String inputTableName) {
-      endFunction(function, new MetaStoreEndFunctionContext(successful, e, inputTableName));
+      endFunction(function, successful, e, null, inputTableName);
+    }
+
+    private void endFunction(String function, boolean successful, Exception e,
+                             String inputDbName, String inputTableName) {
+      endFunction(function, new MetaStoreEndFunctionContext(successful, e, inputDbName, inputTableName));
     }
 
     private void endFunction(String function, MetaStoreEndFunctionContext context) {
@@ -996,7 +1001,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("create_database", success, ex);
+        endFunction("create_database", success, ex, db.getName(), null);
       }
     }
 
@@ -1015,7 +1020,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         throw e;
       } finally {
-        endFunction("get_database", db != null, ex);
+        endFunction("get_database", db != null, ex, name, null);
       }
       return db;
     }
@@ -1057,7 +1062,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         rethrowException(e);
       } finally {
-        endFunction("alter_database", success, ex);
+        endFunction("alter_database", success, ex, dbName, null);
       }
     }
 
@@ -1204,7 +1209,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
 
       startFunction("drop_database", ": " + dbName);
       if (DEFAULT_DATABASE_NAME.equalsIgnoreCase(dbName)) {
-        endFunction("drop_database", false, null);
+        endFunction("drop_database", false, null, dbName, null);
         throw new MetaException("Can not drop default database");
       }
 
@@ -1228,7 +1233,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("drop_database", success, ex);
+        endFunction("drop_database", success, ex, dbName, null);
       }
     }
 
@@ -1553,7 +1558,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("create_table", success, ex, tbl.getTableName());
+        endFunction("create_table", success, ex, tbl.getDbName(), tbl.getTableName());
       }
     }
 
@@ -1817,7 +1822,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("drop_table", success, ex, name);
+        endFunction("drop_table", success, ex, dbname, name);
       }
 
     }
@@ -1853,7 +1858,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         throw e;
       } finally {
-        endFunction("get_table", t != null, ex, name);
+        endFunction("get_table", t != null, ex, dbname, name);
       }
       return t;
     }
@@ -1973,7 +1978,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("get_multi_table", tables != null, ex, join(tableNames, ","));
+        endFunction("get_multi_table", tables != null, ex, dbName, join(tableNames, ","));
       }
       return tables;
     }
@@ -2005,7 +2010,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("get_table_names_by_filter", tables != null, ex, join(tables, ","));
+        endFunction("get_table_names_by_filter", tables != null, ex, dbName, join(tables, ","));
       }
       return tables;
     }
@@ -2148,7 +2153,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("append_partition", ret != null, ex, tableName);
+        endFunction("append_partition", ret != null, ex, dbName, tableName);
       }
       return ret;
     }
@@ -2392,8 +2397,9 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
+        String dbName = parts.get(0).getDbName();
         String tableName = parts.get(0).getTableName();
-        endFunction("add_partition", ret != null, ex, tableName);
+        endFunction("add_partition", ret != null, ex, dbName, tableName);
       }
       return ret;
     }
@@ -2742,7 +2748,13 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("add_partition", ret != null, ex, part != null ?  part.getTableName(): null);
+        String dbName = null;
+        String tableName = null;
+        if (part != null) {
+          dbName = part.getDbName();
+          tableName = part.getTableName();
+        }
+        endFunction("add_partition", ret != null, ex, dbName, tableName);
       }
       return ret;
     }
@@ -3171,7 +3183,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         rethrowException(e);
       } finally {
-        endFunction("drop_partition", ret, ex, tbl_name);
+        endFunction("drop_partition", ret, ex, db_name, tbl_name);
       }
       return ret;
 
@@ -3197,7 +3209,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("get_partition", ret != null, ex, tbl_name);
+        endFunction("get_partition", ret != null, ex, db_name, tbl_name);
       }
       return ret;
     }
@@ -3244,7 +3256,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         rethrowException(e);
       } finally {
-        endFunction("get_partition_with_auth", ret != null, ex, tbl_name);
+        endFunction("get_partition_with_auth", ret != null, ex, db_name, tbl_name);
       }
       return ret;
     }
@@ -3269,7 +3281,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("get_partitions", ret != null, ex, tbl_name);
+        endFunction("get_partitions", ret != null, ex, db_name, tbl_name);
       }
       return ret;
 
@@ -3295,7 +3307,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         rethrowException(e);
       } finally {
-        endFunction("get_partitions_with_auth", ret != null, ex, tblName);
+        endFunction("get_partitions_with_auth", ret != null, ex, dbName, tblName);
       }
       return ret;
 
@@ -3359,7 +3371,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         return partitionSpecs;
       }
       finally {
-        endFunction("get_partitions_pspec", partitionSpecs != null && !partitionSpecs.isEmpty(), null, tbl_name);
+        endFunction("get_partitions_pspec", partitionSpecs != null && !partitionSpecs.isEmpty(), null, dbName, tbl_name);
       }
     }
 
@@ -3502,7 +3514,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("get_partition_names", ret != null, ex, tbl_name);
+        endFunction("get_partition_names", ret != null, ex, db_name, tbl_name);
       }
       return ret;
     }
@@ -3592,7 +3604,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("alter_partition", oldPart != null, ex, tbl_name);
+        endFunction("alter_partition", oldPart != null, ex, db_name, tbl_name);
       }
     }
 
@@ -3654,7 +3666,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("alter_partition", oldParts != null, ex, tbl_name);
+        endFunction("alter_partition", oldParts != null, ex, db_name, tbl_name);
       }
     }
 
@@ -3700,7 +3712,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           ms.rollbackTransaction();
         }
 
-        endFunction("alter_index", success, ex, base_table_name);
+        endFunction("alter_index", success, ex, dbname, base_table_name);
         for (MetaStoreEventListener listener : listeners) {
           AlterIndexEvent alterIndexEvent = new AlterIndexEvent(oldIndex, newIndex, success, this);
           listener.onAlterIndex(alterIndexEvent);
@@ -3787,7 +3799,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("alter_table", success, ex, name);
+        endFunction("alter_table", success, ex, dbname, name);
       }
     }
 
@@ -3808,7 +3820,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("get_tables", ret != null, ex);
+        endFunction("get_tables", ret != null, ex, dbname, null);
       }
       return ret;
     }
@@ -3829,7 +3841,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("get_all_tables", ret != null, ex);
+        endFunction("get_all_tables", ret != null, ex, dbname, null);
       }
       return ret;
     }
@@ -3898,7 +3910,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         if (orgHiveLoader != null) {
           curConf.setClassLoader(orgHiveLoader);
         }
-        endFunction("get_fields_with_environment_context", ret != null, ex, tableName);
+        endFunction("get_fields_with_environment_context", ret != null, ex, db, tableName);
       }
 
       return ret;
@@ -3983,7 +3995,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw me;
         }
       } finally {
-        endFunction("get_schema_with_environment_context", success, ex, tableName);
+        endFunction("get_schema_with_environment_context", success, ex, db, tableName);
       }
     }
 
@@ -4101,7 +4113,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         rethrowException(e);
       } finally {
-        endFunction("get_partition_by_name", ret != null, ex, tbl_name);
+        endFunction("get_partition_by_name", ret != null, ex, db_name, tbl_name);
       }
       return ret;
     }
@@ -4140,7 +4152,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("append_partition_by_name", ret != null, ex, tbl_name);
+        endFunction("append_partition_by_name", ret != null, ex, db_name, tbl_name);
       }
       return ret;
     }
@@ -4188,7 +4200,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         rethrowException(e);
       } finally {
-        endFunction("drop_partition_by_name", ret, ex, tbl_name);
+        endFunction("drop_partition_by_name", ret, ex, db_name, tbl_name);
       }
 
       return ret;
@@ -4209,7 +4221,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         rethrowException(e);
       } finally {
-        endFunction("get_partitions_ps", ret != null, ex, tbl_name);
+        endFunction("get_partitions_ps", ret != null, ex, db_name, tbl_name);
       }
 
       return ret;
@@ -4235,7 +4247,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         rethrowException(e);
       } finally {
-        endFunction("get_partitions_ps_with_auth", ret != null, ex, tbl_name);
+        endFunction("get_partitions_ps_with_auth", ret != null, ex, db_name, tbl_name);
       }
       return ret;
     }
@@ -4254,7 +4266,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         rethrowException(e);
       } finally {
-        endFunction("get_partitions_names_ps", ret != null, ex, tbl_name);
+        endFunction("get_partitions_names_ps", ret != null, ex, db_name, tbl_name);
       }
       return ret;
     }
@@ -4302,8 +4314,9 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
+        String dbName = indexTable != null ? indexTable.getDbName() : null;
         String tableName = indexTable != null ? indexTable.getTableName() : null;
-        endFunction("add_index", ret != null, ex, tableName);
+        endFunction("add_index", ret != null, ex, dbName, tableName);
       }
       return ret;
     }
@@ -4397,7 +4410,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         rethrowException(e);
       } finally {
-        endFunction("drop_index_by_name", ret, ex, tblName);
+        endFunction("drop_index_by_name", ret, ex, dbName, tblName);
       }
 
       return ret;
@@ -4486,7 +4499,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         rethrowException(e);
       } finally {
-        endFunction("get_index_by_name", ret != null, ex, tblName);
+        endFunction("get_index_by_name", ret != null, ex, dbName, tblName);
       }
       return ret;
     }
@@ -4522,7 +4535,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("get_index_names", ret != null, ex, tblName);
+        endFunction("get_index_names", ret != null, ex, dbName, tblName);
       }
       return ret;
     }
@@ -4541,7 +4554,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         rethrowException(e);
       } finally {
-        endFunction("get_indexes", ret != null, ex, tblName);
+        endFunction("get_indexes", ret != null, ex, dbName, tblName);
       }
       return ret;
     }
@@ -4582,7 +4595,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         assert statsObj.getStatsObjSize() <= 1;
         return statsObj;
       } finally {
-        endFunction("get_column_statistics_by_table", statsObj != null, null, tableName);
+        endFunction("get_column_statistics_by_table", statsObj != null, null, dbName, tableName);
       }
     }
 
@@ -4602,7 +4615,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         result = new TableStatsResult(
             cs == null ? Lists.<ColumnStatisticsObj>newArrayList() : cs.getStatsObj());
       } finally {
-        endFunction("get_table_statistics_req", result == null, null, tblName);
+        endFunction("get_table_statistics_req", result == null, null, dbName, tblName);
       }
       return result;
     }
@@ -4629,7 +4642,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         }
         statsObj = list.get(0);
       } finally {
-        endFunction("get_column_statistics_by_partition", statsObj != null, null, tableName);
+        endFunction("get_column_statistics_by_partition", statsObj != null, null, dbName, tableName);
       }
       return statsObj;
     }
@@ -4660,7 +4673,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         }
         result = new PartitionsStatsResult(map);
       } finally {
-        endFunction("get_partitions_statistics_req", result == null, null, tblName);
+        endFunction("get_partitions_statistics_req", result == null, null, dbName, tblName);
       }
       return result;
     }
@@ -4701,7 +4714,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ret = getMS().updateTableColumnStatistics(colStats);
         return ret;
       } finally {
-        endFunction("write_column_statistics", ret != false, null, tableName);
+        endFunction("write_column_statistics", ret != false, null, dbName, tableName);
       }
     }
 
@@ -4750,7 +4763,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ret = getMS().updatePartitionColumnStatistics(colStats, partVals);
         return ret;
       } finally {
-        endFunction("write_partition_column_statistics", ret != false, null, tableName);
+        endFunction("write_partition_column_statistics", ret != false, null, dbName, tableName);
       }
     }
 
@@ -4775,7 +4788,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ret = getMS().deletePartitionColumnStatistics(dbName, tableName,
                                                       convertedPartName, partVals, colName);
       } finally {
-        endFunction("delete_column_statistics_by_partition", ret != false, null, tableName);
+        endFunction("delete_column_statistics_by_partition", ret != false, null, dbName, tableName);
       }
       return ret;
     }
@@ -4798,7 +4811,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
       try {
         ret = getMS().deleteTableColumnStatistics(dbName, tableName, colName);
       } finally {
-        endFunction("delete_column_statistics_by_table", ret != false, null, tableName);
+        endFunction("delete_column_statistics_by_table", ret != false, null, dbName, tableName);
       }
       return ret;
    }
@@ -4818,7 +4831,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         rethrowException(e);
       } finally {
-        endFunction("get_partitions_by_filter", ret != null, ex, tblName);
+        endFunction("get_partitions_by_filter", ret != null, ex, dbName, tblName);
       }
       return ret;
     }
@@ -4850,7 +4863,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         return partitionSpecs;
       }
       finally {
-        endFunction("get_partitions_by_filter_pspec", partitionSpecs != null && !partitionSpecs.isEmpty(), null, tblName);
+        endFunction("get_partitions_by_filter_pspec", partitionSpecs != null && !partitionSpecs.isEmpty(), null, dbName, tblName);
       }
     }
 
@@ -4872,7 +4885,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         rethrowException(e);
       } finally {
-        endFunction("get_partitions_by_expr", ret != null, ex, tblName);
+        endFunction("get_partitions_by_expr", ret != null, ex, dbName, tblName);
       }
       return ret;
     }
@@ -4890,7 +4903,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         throw newMetaException(e);
       }
     }
-    
+
     public int get_num_partitions_by_filter(final String dbName,
                                             final String tblName, final String filter)
             throws TException {
@@ -4904,7 +4917,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         rethrowException(e);
       } finally {
-        endFunction("get_num_partitions_by_filter", ret != -1, ex, tblName);
+        endFunction("get_num_partitions_by_filter", ret != -1, ex, dbName, tblName);
       }
       return ret;
     }
@@ -4922,7 +4935,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         rethrowException(e);
       } finally {
-        endFunction("get_num_partitions_by_expr", ret != -1, ex, tblName);
+        endFunction("get_num_partitions_by_expr", ret != -1, ex, dbName, tblName);
       }
       return ret;
     }
@@ -4942,7 +4955,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         rethrowException(e);
       } finally {
-        endFunction("get_partitions_by_names", ret != null, ex, tblName);
+        endFunction("get_partitions_by_names", ret != null, ex, dbName, tblName);
       }
       return ret;
     }
@@ -5901,7 +5914,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           ms.rollbackTransaction();
         }
 
-        endFunction("markPartitionForEvent", tbl != null, ex, tbl_name);
+        endFunction("markPartitionForEvent", tbl != null, ex, db_name, tbl_name);
       }
     }
 
@@ -5935,7 +5948,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(original);
         }
       } finally {
-                endFunction("isPartitionMarkedForEvent", ret != null, ex, tbl_name);
+                endFunction("isPartitionMarkedForEvent", ret != null, ex, db_name, tbl_name);
       }
 
       return ret;
@@ -6107,7 +6120,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         throw newMetaException(e);
       } finally {
-        endFunction("get_functions", funcNames != null, ex);
+        endFunction("get_functions", funcNames != null, ex, dbName, null);
       }
 
       return funcNames;
@@ -6155,7 +6168,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
         ex = e;
         throw newMetaException(e);
       } finally {
-        endFunction("get_function", func != null, ex);
+        endFunction("get_function", func != null, ex, dbName, null);
       }
 
       return func;
@@ -6327,7 +6340,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
             lowerCaseColNames));
         return aggrStats;
       } finally {
-          endFunction("get_aggr_stats_for", aggrStats == null, null, request.getTblName());
+          endFunction("get_aggr_stats_for", aggrStats == null, null, request.getDbName(), request.getTblName());
       }
 
     }
@@ -6905,3 +6918,4 @@ public class HiveMetaStore extends ThriftHiveMetastore {
     thread.start();
   }
 }
+
