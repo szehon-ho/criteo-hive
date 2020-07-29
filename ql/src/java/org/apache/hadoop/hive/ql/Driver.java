@@ -1788,7 +1788,7 @@ public class Driver implements CommandProcessor {
       int jobs = mrJobs + Utilities.getTezTasks(plan.getRootTasks()).size()
           + Utilities.getSparkTasks(plan.getRootTasks()).size();
       if (jobs > 0) {
-        logMrWarning(mrJobs);
+//        logMrWarning(mrJobs);
         console.printInfo("Query ID = " + queryId);
         console.printInfo("Total jobs = " + jobs);
       }
@@ -2089,18 +2089,18 @@ public class Driver implements CommandProcessor {
   }
 
   private void logMrWarning(int mrJobs) {
-//    if (mrJobs <= 0 || !("mr".equals(HiveConf.getVar(conf, ConfVars.HIVE_EXECUTION_ENGINE)))) {
-//      return;
-//    }
-//    String warning = HiveConf.generateMrDeprecationWarning();
-//    LOG.warn(warning);
-//    warning = "WARNING: " + warning;
-//    console.printInfo(warning);
-//    // Propagate warning to beeline via operation log.
-//    OperationLog ol = OperationLog.getCurrentOperationLog();
-//    if (ol != null) {
-//      ol.writeOperationLog(LoggingLevel.EXECUTION, warning + "\n");
-//    }
+    if (mrJobs <= 0 || !("mr".equals(HiveConf.getVar(conf, ConfVars.HIVE_EXECUTION_ENGINE)))) {
+      return;
+    }
+    String warning = HiveConf.generateMrDeprecationWarning();
+    LOG.warn(warning);
+    warning = "WARNING: " + warning;
+    console.printInfo(warning);
+    // Propagate warning to beeline via operation log.
+    OperationLog ol = OperationLog.getCurrentOperationLog();
+    if (ol != null) {
+      ol.writeOperationLog(LoggingLevel.EXECUTION, warning + "\n");
+    }
   }
 
   private void setErrorMsgAndDetail(int exitVal, Throwable downstreamError, Task tsk) {
