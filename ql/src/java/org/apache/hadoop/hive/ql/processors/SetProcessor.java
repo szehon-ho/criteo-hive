@@ -248,10 +248,10 @@ public class SetProcessor implements CommandProcessor {
       if (!"spark".equals(value)) {
         SessionState.get().closeSparkSession();
       }
-      if ("mr".equals(value)) {
-        result = HiveConf.generateMrDeprecationWarning();
-        LOG.warn(result);
-      }
+//      if ("mr".equals(value)) {
+//        result = HiveConf.generateMrDeprecationWarning();
+//        LOG.warn(result);
+//      }
     }
     if (register) {
       SessionState.get().getOverriddenConfigurations().put(key, value);
