@@ -13,4 +13,8 @@ LOCATION
 
 SELECT * FROM parquet_array_of_multi_field_structs_gen_schema;
 
+alter table parquet_array_of_multi_field_structs_gen_schema add columns (test string);
+
+SELECT * FROM parquet_array_of_multi_field_structs_gen_schema;
+
 DROP TABLE parquet_array_of_multi_field_structs_gen_schema;

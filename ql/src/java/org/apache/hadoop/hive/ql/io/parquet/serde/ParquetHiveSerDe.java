@@ -426,4 +426,8 @@ public class ParquetHiveSerDe extends AbstractSerDe {
 
     return null;
   }
+
+  public boolean shouldStoreFieldsInMetastore(Map<String, String> tableParams) {
+    return true;
+  }
 }
