@@ -265,7 +265,7 @@ public class ColumnStatsSemanticAnalyzer extends SemanticAnalyzer {
     if (isPartitionStats) {
       for (FieldSchema fs : tbl.getPartCols()) {
         String fieldName = fs.getName();
-        if (partSpec.containsKey(fieldName)) {
+        if (partSpec.containsKey(fieldName) && partSpec.get(fieldName) != null) {
           rewrittenQueryBuilder.append(" , '");
           rewrittenQueryBuilder.append(partSpec.get(fieldName));
           rewrittenQueryBuilder.append("' as `");
