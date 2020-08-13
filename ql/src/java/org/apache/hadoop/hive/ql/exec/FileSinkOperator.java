@@ -1016,7 +1016,7 @@ public class FileSinkOperator extends TerminalOperator<FileSinkDesc> implements
     LOG.info(toString() + ": records written - " + numRows);
 
     if (!bDynParts && !filesCreated) {
-      boolean skipFiles = "tez".equalsIgnoreCase(
+      boolean skipFiles = conf != null && "tez".equalsIgnoreCase(
           HiveConf.getVar(hconf, ConfVars.HIVE_EXECUTION_ENGINE));
       if (skipFiles) {
         Class<?> clazz = conf.getTableInfo().getOutputFileFormatClass();
@@ -1032,7 +1032,7 @@ public class FileSinkOperator extends TerminalOperator<FileSinkDesc> implements
       // If serializer is ThriftJDBCBinarySerDe, then it buffers rows to a certain limit (hive.server2.thrift.resultset.max.fetch.size)
       // and serializes the whole batch when the buffer is full. The serialize returns null if the buffer is not full
       // (the size of buffer is kept track of in the ThriftJDBCBinarySerDe).
-      if (conf.isUsingThriftJDBCBinarySerDe()) {
+      if (conf != null && conf.isUsingThriftJDBCBinarySerDe()) {
           try {
             recordValue = serializer.serialize(null, inputObjInspectors[0]);
             if ( null != fpaths ) {
@@ -1052,7 +1052,7 @@ public class FileSinkOperator extends TerminalOperator<FileSinkDesc> implements
         // this adds more overhead to the actual processing of row. But if the
         // record writer already gathers the statistics, it can simply return the
         // accumulated statistics which will be aggregated in case of spray writers
-        if (conf.isGatherStats() && isCollectRWStats) {
+        if (conf != null && conf.isGatherStats() && isCollectRWStats) {
           if (conf.getWriteType() == AcidUtils.Operation.NOT_ACID) {
             for (int idx = 0; idx < fsp.outWriters.length; idx++) {
               RecordWriter outWriter = fsp.outWriters[idx];
@@ -1082,7 +1082,7 @@ public class FileSinkOperator extends TerminalOperator<FileSinkDesc> implements
         }
       }
       // Only publish stats if this operator's flag was set to gather stats
-      if (conf.isGatherStats()) {
+      if (conf != null && conf.isGatherStats()) {
         publishStats();
       }
     } else {
