@@ -3382,7 +3382,9 @@ public class HiveConf extends Configuration {
             "This parameter enables a number of optimizations when running on blobstores:\n" +
             "(1) If hive.blobstore.use.blobstore.as.scratchdir is false, force the last Hive job to write to the blobstore.\n" +
             "This is a performance optimization that forces the final FileSinkOperator to write to the blobstore.\n" +
-            "See HIVE-15121 for details.");
+            "See HIVE-15121 for details."),
+
+    HIVE_LINEAGE_INFO("hive.lineage.hook.info.enabled", false, "Whether Hive provides lineage information to hooks.");
 
     public final String varname;
     public final String altName;
