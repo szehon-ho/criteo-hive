@@ -2233,10 +2233,10 @@ public class HiveConf extends Configuration {
             "ideal if the blobstore connector cannot efficiently rename a directory (e.g. HADOOP-13600). By default,\n" +
             "renames are done using a thread pool which allows each individual file to be renamed in parallel. The\n" +
             "size of the threadpool is controlled by the hive.mv.files.thread parameter."),
-
     HIVE_QUERY_TIMEOUT_SECONDS("hive.query.timeout.seconds", "0s",
         "Timeout for Running Query in seconds. A nonpositive value means infinite. " +
-        "If the query timeout is also set by thrift API call, the smaller one will be taken.");
+        "If the query timeout is also set by thrift API call, the smaller one will be taken."),
+    HIVE_LINEAGE_INFO("hive.lineage.hook.info.enabled", false, "Whether Hive provides lineage information to hooks.");
 
     public final String varname;
     private final String defaultExpr;

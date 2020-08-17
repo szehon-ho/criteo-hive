@@ -70,8 +70,9 @@ public class Optimizer {
     Set<String> postExecHooks = Sets.newHashSet(
       Splitter.on(",").trimResults().omitEmptyStrings().split(
         Strings.nullToEmpty(HiveConf.getVar(hiveConf, HiveConf.ConfVars.POSTEXECHOOKS))));
-    if (postExecHooks.contains("org.apache.hadoop.hive.ql.hooks.PostExecutePrinter")
-        || postExecHooks.contains("org.apache.hadoop.hive.ql.hooks.LineageLogger")) {
+    if (hiveConf.getBoolVar(HiveConf.ConfVars.HIVE_LINEAGE_INFO)
+        || postExecHooks.contains("org.apache.hadoop.hive.ql.hooks.PostExecutePrinter")
+        || postExecHooks.contains("org.apache.hadoop.hive.ql.hooks.LineageLogger"))
       transformations.add(new Generator());
     }
 
