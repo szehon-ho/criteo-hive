@@ -1016,7 +1016,7 @@ public class FileSinkOperator extends TerminalOperator<FileSinkDesc> implements
     LOG.info(toString() + ": records written - " + numRows);
 
     if (!bDynParts && !filesCreated) {
-      boolean skipFiles = conf != null && "tez".equalsIgnoreCase(
+      boolean skipFiles = hconf != null && conf != null && "tez".equalsIgnoreCase(
           HiveConf.getVar(hconf, ConfVars.HIVE_EXECUTION_ENGINE));
       if (skipFiles) {
         Class<?> clazz = conf.getTableInfo().getOutputFileFormatClass();
