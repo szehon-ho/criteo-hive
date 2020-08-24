@@ -1,0 +1,338 @@
+PREHOOK: query: DROP TABLE parquet_schema_evolution_partitions
+PREHOOK: type: DROPTABLE
+POSTHOOK: query: DROP TABLE parquet_schema_evolution_partitions
+POSTHOOK: type: DROPTABLE
+PREHOOK: query: DROP TABLE parquet_schema_evolution_partitions_output
+PREHOOK: type: DROPTABLE
+POSTHOOK: query: DROP TABLE parquet_schema_evolution_partitions_output
+POSTHOOK: type: DROPTABLE
+PREHOOK: query: DROP TABLE parquet_schema_evolution_partitions_struct
+PREHOOK: type: DROPTABLE
+POSTHOOK: query: DROP TABLE parquet_schema_evolution_partitions_struct
+POSTHOOK: type: DROPTABLE
+PREHOOK: query: CREATE TABLE parquet_schema_evolution_partitions (col0 int, col1 array<int>)
+PARTITIONED BY (pname string)
+STORED AS PARQUET
+PREHOOK: type: CREATETABLE
+PREHOOK: Output: database:default
+PREHOOK: Output: default@parquet_schema_evolution_partitions
+POSTHOOK: query: CREATE TABLE parquet_schema_evolution_partitions (col0 int, col1 array<int>)
+PARTITIONED BY (pname string)
+STORED AS PARQUET
+POSTHOOK: type: CREATETABLE
+POSTHOOK: Output: database:default
+POSTHOOK: Output: default@parquet_schema_evolution_partitions
+PREHOOK: query: INSERT INTO TABLE parquet_schema_evolution_partitions PARTITION (pname='1')
+  SELECT 1, array(0, 1)
+PREHOOK: type: QUERY
+PREHOOK: Input: _dummy_database@_dummy_table
+PREHOOK: Output: default@parquet_schema_evolution_partitions@pname=1
+POSTHOOK: query: INSERT INTO TABLE parquet_schema_evolution_partitions PARTITION (pname='1')
+  SELECT 1, array(0, 1)
+POSTHOOK: type: QUERY
+POSTHOOK: Input: _dummy_database@_dummy_table
+POSTHOOK: Output: default@parquet_schema_evolution_partitions@pname=1
+POSTHOOK: Lineage: parquet_schema_evolution_partitions PARTITION(pname=1).col0 SIMPLE []
+POSTHOOK: Lineage: parquet_schema_evolution_partitions PARTITION(pname=1).col1 EXPRESSION []
+PREHOOK: query: SELECT * FROM parquet_schema_evolution_partitions
+PREHOOK: type: QUERY
+PREHOOK: Input: default@parquet_schema_evolution_partitions
+PREHOOK: Input: default@parquet_schema_evolution_partitions@pname=1
+#### A masked pattern was here ####
+POSTHOOK: query: SELECT * FROM parquet_schema_evolution_partitions
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@parquet_schema_evolution_partitions
+POSTHOOK: Input: default@parquet_schema_evolution_partitions@pname=1
+#### A masked pattern was here ####
+1	[0,1]	1
+PREHOOK: query: ALTER TABLE parquet_schema_evolution_partitions replace columns (col1 array<int>, col0 int)
+PREHOOK: type: ALTERTABLE_REPLACECOLS
+PREHOOK: Input: default@parquet_schema_evolution_partitions
+PREHOOK: Output: default@parquet_schema_evolution_partitions
+POSTHOOK: query: ALTER TABLE parquet_schema_evolution_partitions replace columns (col1 array<int>, col0 int)
+POSTHOOK: type: ALTERTABLE_REPLACECOLS
+POSTHOOK: Input: default@parquet_schema_evolution_partitions
+POSTHOOK: Output: default@parquet_schema_evolution_partitions
+PREHOOK: query: INSERT INTO TABLE parquet_schema_evolution_partitions PARTITION (pname='2')
+  SELECT array(2, 3), 2
+PREHOOK: type: QUERY
+PREHOOK: Input: _dummy_database@_dummy_table
+PREHOOK: Output: default@parquet_schema_evolution_partitions@pname=2
+POSTHOOK: query: INSERT INTO TABLE parquet_schema_evolution_partitions PARTITION (pname='2')
+  SELECT array(2, 3), 2
+POSTHOOK: type: QUERY
+POSTHOOK: Input: _dummy_database@_dummy_table
+POSTHOOK: Output: default@parquet_schema_evolution_partitions@pname=2
+POSTHOOK: Lineage: parquet_schema_evolution_partitions PARTITION(pname=2).col0 SIMPLE []
+POSTHOOK: Lineage: parquet_schema_evolution_partitions PARTITION(pname=2).col1 EXPRESSION []
+PREHOOK: query: SELECT * FROM parquet_schema_evolution_partitions
+PREHOOK: type: QUERY
+PREHOOK: Input: default@parquet_schema_evolution_partitions
+PREHOOK: Input: default@parquet_schema_evolution_partitions@pname=1
+PREHOOK: Input: default@parquet_schema_evolution_partitions@pname=2
+#### A masked pattern was here ####
+POSTHOOK: query: SELECT * FROM parquet_schema_evolution_partitions
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@parquet_schema_evolution_partitions
+POSTHOOK: Input: default@parquet_schema_evolution_partitions@pname=1
+POSTHOOK: Input: default@parquet_schema_evolution_partitions@pname=2
+#### A masked pattern was here ####
+[0,1]	1	1
+[2,3]	2	2
+PREHOOK: query: ALTER TABLE parquet_schema_evolution_partitions replace columns (col2 string, col1 array<int>, col0 int)
+PREHOOK: type: ALTERTABLE_REPLACECOLS
+PREHOOK: Input: default@parquet_schema_evolution_partitions
+PREHOOK: Output: default@parquet_schema_evolution_partitions
+POSTHOOK: query: ALTER TABLE parquet_schema_evolution_partitions replace columns (col2 string, col1 array<int>, col0 int)
+POSTHOOK: type: ALTERTABLE_REPLACECOLS
+POSTHOOK: Input: default@parquet_schema_evolution_partitions
+POSTHOOK: Output: default@parquet_schema_evolution_partitions
+PREHOOK: query: INSERT INTO TABLE parquet_schema_evolution_partitions PARTITION (pname='3')
+  SELECT 'three', array(4, 5, 6), 3
+PREHOOK: type: QUERY
+PREHOOK: Input: _dummy_database@_dummy_table
+PREHOOK: Output: default@parquet_schema_evolution_partitions@pname=3
+POSTHOOK: query: INSERT INTO TABLE parquet_schema_evolution_partitions PARTITION (pname='3')
+  SELECT 'three', array(4, 5, 6), 3
+POSTHOOK: type: QUERY
+POSTHOOK: Input: _dummy_database@_dummy_table
+POSTHOOK: Output: default@parquet_schema_evolution_partitions@pname=3
+POSTHOOK: Lineage: parquet_schema_evolution_partitions PARTITION(pname=3).col0 SIMPLE []
+POSTHOOK: Lineage: parquet_schema_evolution_partitions PARTITION(pname=3).col1 EXPRESSION []
+POSTHOOK: Lineage: parquet_schema_evolution_partitions PARTITION(pname=3).col2 SIMPLE []
+PREHOOK: query: SELECT * FROM parquet_schema_evolution_partitions
+PREHOOK: type: QUERY
+PREHOOK: Input: default@parquet_schema_evolution_partitions
+PREHOOK: Input: default@parquet_schema_evolution_partitions@pname=1
+PREHOOK: Input: default@parquet_schema_evolution_partitions@pname=2
+PREHOOK: Input: default@parquet_schema_evolution_partitions@pname=3
+#### A masked pattern was here ####
+POSTHOOK: query: SELECT * FROM parquet_schema_evolution_partitions
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@parquet_schema_evolution_partitions
+POSTHOOK: Input: default@parquet_schema_evolution_partitions@pname=1
+POSTHOOK: Input: default@parquet_schema_evolution_partitions@pname=2
+POSTHOOK: Input: default@parquet_schema_evolution_partitions@pname=3
+#### A masked pattern was here ####
+NULL	[0,1]	1	1
+NULL	[2,3]	2	2
+three	[4,5,6]	3	3
+PREHOOK: query: ALTER TABLE parquet_schema_evolution_partitions replace columns (col2 string, col1 array<bigint>, col0 bigint)
+PREHOOK: type: ALTERTABLE_REPLACECOLS
+PREHOOK: Input: default@parquet_schema_evolution_partitions
+PREHOOK: Output: default@parquet_schema_evolution_partitions
+POSTHOOK: query: ALTER TABLE parquet_schema_evolution_partitions replace columns (col2 string, col1 array<bigint>, col0 bigint)
+POSTHOOK: type: ALTERTABLE_REPLACECOLS
+POSTHOOK: Input: default@parquet_schema_evolution_partitions
+POSTHOOK: Output: default@parquet_schema_evolution_partitions
+PREHOOK: query: INSERT INTO TABLE parquet_schema_evolution_partitions PARTITION (pname='3')
+  SELECT 'four', array(cast(7 as bigint), 8, 9), 4
+PREHOOK: type: QUERY
+PREHOOK: Input: _dummy_database@_dummy_table
+PREHOOK: Output: default@parquet_schema_evolution_partitions@pname=3
+POSTHOOK: query: INSERT INTO TABLE parquet_schema_evolution_partitions PARTITION (pname='3')
+  SELECT 'four', array(cast(7 as bigint), 8, 9), 4
+POSTHOOK: type: QUERY
+POSTHOOK: Input: _dummy_database@_dummy_table
+POSTHOOK: Output: default@parquet_schema_evolution_partitions@pname=3
+POSTHOOK: Lineage: parquet_schema_evolution_partitions PARTITION(pname=3).col0 EXPRESSION []
+POSTHOOK: Lineage: parquet_schema_evolution_partitions PARTITION(pname=3).col1 EXPRESSION []
+POSTHOOK: Lineage: parquet_schema_evolution_partitions PARTITION(pname=3).col2 SIMPLE []
+PREHOOK: query: CREATE TABLE parquet_schema_evolution_partitions_output (col0 string, col1 bigint, col2 bigint)
+STORED AS PARQUET
+PREHOOK: type: CREATETABLE
+PREHOOK: Output: database:default
+PREHOOK: Output: default@parquet_schema_evolution_partitions_output
+POSTHOOK: query: CREATE TABLE parquet_schema_evolution_partitions_output (col0 string, col1 bigint, col2 bigint)
+STORED AS PARQUET
+POSTHOOK: type: CREATETABLE
+POSTHOOK: Output: database:default
+POSTHOOK: Output: default@parquet_schema_evolution_partitions_output
+PREHOOK: query: INSERT INTO parquet_schema_evolution_partitions_output
+SELECT col2 AS col0, col1[0] AS col1, col0 as col2
+FROM parquet_schema_evolution_partitions
+PREHOOK: type: QUERY
+PREHOOK: Input: default@parquet_schema_evolution_partitions
+PREHOOK: Input: default@parquet_schema_evolution_partitions@pname=1
+PREHOOK: Input: default@parquet_schema_evolution_partitions@pname=2
+PREHOOK: Input: default@parquet_schema_evolution_partitions@pname=3
+PREHOOK: Output: default@parquet_schema_evolution_partitions_output
+POSTHOOK: query: INSERT INTO parquet_schema_evolution_partitions_output
+SELECT col2 AS col0, col1[0] AS col1, col0 as col2
+FROM parquet_schema_evolution_partitions
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@parquet_schema_evolution_partitions
+POSTHOOK: Input: default@parquet_schema_evolution_partitions@pname=1
+POSTHOOK: Input: default@parquet_schema_evolution_partitions@pname=2
+POSTHOOK: Input: default@parquet_schema_evolution_partitions@pname=3
+POSTHOOK: Output: default@parquet_schema_evolution_partitions_output
+POSTHOOK: Lineage: parquet_schema_evolution_partitions_output.col0 SIMPLE [(parquet_schema_evolution_partitions)parquet_schema_evolution_partitions.FieldSchema(name:col2, type:string, comment:), ]
+POSTHOOK: Lineage: parquet_schema_evolution_partitions_output.col1 EXPRESSION [(parquet_schema_evolution_partitions)parquet_schema_evolution_partitions.FieldSchema(name:col1, type:array<bigint>, comment:), ]
+POSTHOOK: Lineage: parquet_schema_evolution_partitions_output.col2 SIMPLE [(parquet_schema_evolution_partitions)parquet_schema_evolution_partitions.FieldSchema(name:col0, type:bigint, comment:), ]
+PREHOOK: query: SELECT * FROM parquet_schema_evolution_partitions_output
+PREHOOK: type: QUERY
+PREHOOK: Input: default@parquet_schema_evolution_partitions_output
+#### A masked pattern was here ####
+POSTHOOK: query: SELECT * FROM parquet_schema_evolution_partitions_output
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_output
+#### A masked pattern was here ####
+NULL	0	1
+NULL	2	2
+three	4	3
+four	7	4
+PREHOOK: query: CREATE TABLE parquet_schema_evolution_partitions_struct (f struct<col0:int,col1:double>)
+PARTITIONED BY (pname string)
+STORED AS PARQUET
+PREHOOK: type: CREATETABLE
+PREHOOK: Output: database:default
+PREHOOK: Output: default@parquet_schema_evolution_partitions_struct
+POSTHOOK: query: CREATE TABLE parquet_schema_evolution_partitions_struct (f struct<col0:int,col1:double>)
+PARTITIONED BY (pname string)
+STORED AS PARQUET
+POSTHOOK: type: CREATETABLE
+POSTHOOK: Output: database:default
+POSTHOOK: Output: default@parquet_schema_evolution_partitions_struct
+PREHOOK: query: INSERT INTO TABLE parquet_schema_evolution_partitions_struct PARTITION (pname='1')
+  SELECT named_struct('col0', 1, 'col1', cast(1.0 as double))
+PREHOOK: type: QUERY
+PREHOOK: Input: _dummy_database@_dummy_table
+PREHOOK: Output: default@parquet_schema_evolution_partitions_struct@pname=1
+POSTHOOK: query: INSERT INTO TABLE parquet_schema_evolution_partitions_struct PARTITION (pname='1')
+  SELECT named_struct('col0', 1, 'col1', cast(1.0 as double))
+POSTHOOK: type: QUERY
+POSTHOOK: Input: _dummy_database@_dummy_table
+POSTHOOK: Output: default@parquet_schema_evolution_partitions_struct@pname=1
+POSTHOOK: Lineage: parquet_schema_evolution_partitions_struct PARTITION(pname=1).f EXPRESSION []
+PREHOOK: query: ALTER TABLE parquet_schema_evolution_partitions_struct change column f f struct<col1:double,col0:int>
+PREHOOK: type: ALTERTABLE_RENAMECOL
+PREHOOK: Input: default@parquet_schema_evolution_partitions_struct
+PREHOOK: Output: default@parquet_schema_evolution_partitions_struct
+POSTHOOK: query: ALTER TABLE parquet_schema_evolution_partitions_struct change column f f struct<col1:double,col0:int>
+POSTHOOK: type: ALTERTABLE_RENAMECOL
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_struct
+POSTHOOK: Output: default@parquet_schema_evolution_partitions_struct
+PREHOOK: query: INSERT INTO TABLE parquet_schema_evolution_partitions_struct PARTITION (pname='2')
+  SELECT named_struct('col1', cast(2.0 as double), 'col0', 2)
+PREHOOK: type: QUERY
+PREHOOK: Input: _dummy_database@_dummy_table
+PREHOOK: Output: default@parquet_schema_evolution_partitions_struct@pname=2
+POSTHOOK: query: INSERT INTO TABLE parquet_schema_evolution_partitions_struct PARTITION (pname='2')
+  SELECT named_struct('col1', cast(2.0 as double), 'col0', 2)
+POSTHOOK: type: QUERY
+POSTHOOK: Input: _dummy_database@_dummy_table
+POSTHOOK: Output: default@parquet_schema_evolution_partitions_struct@pname=2
+POSTHOOK: Lineage: parquet_schema_evolution_partitions_struct PARTITION(pname=2).f EXPRESSION []
+PREHOOK: query: SELECT * FROM parquet_schema_evolution_partitions_struct
+PREHOOK: type: QUERY
+PREHOOK: Input: default@parquet_schema_evolution_partitions_struct
+PREHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=1
+PREHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=2
+#### A masked pattern was here ####
+POSTHOOK: query: SELECT * FROM parquet_schema_evolution_partitions_struct
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_struct
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=1
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=2
+#### A masked pattern was here ####
+{"col1":1.0,"col0":1}	1
+{"col1":2.0,"col0":2}	2
+PREHOOK: query: ALTER TABLE parquet_schema_evolution_partitions_struct change column f f struct<col2:string,col1:double,col0:int>
+PREHOOK: type: ALTERTABLE_RENAMECOL
+PREHOOK: Input: default@parquet_schema_evolution_partitions_struct
+PREHOOK: Output: default@parquet_schema_evolution_partitions_struct
+POSTHOOK: query: ALTER TABLE parquet_schema_evolution_partitions_struct change column f f struct<col2:string,col1:double,col0:int>
+POSTHOOK: type: ALTERTABLE_RENAMECOL
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_struct
+POSTHOOK: Output: default@parquet_schema_evolution_partitions_struct
+PREHOOK: query: INSERT INTO TABLE parquet_schema_evolution_partitions_struct PARTITION (pname='3')
+  SELECT named_struct('col2', 'three', 'col1', cast(3.0 as double), 'col0', 3)
+PREHOOK: type: QUERY
+PREHOOK: Input: _dummy_database@_dummy_table
+PREHOOK: Output: default@parquet_schema_evolution_partitions_struct@pname=3
+POSTHOOK: query: INSERT INTO TABLE parquet_schema_evolution_partitions_struct PARTITION (pname='3')
+  SELECT named_struct('col2', 'three', 'col1', cast(3.0 as double), 'col0', 3)
+POSTHOOK: type: QUERY
+POSTHOOK: Input: _dummy_database@_dummy_table
+POSTHOOK: Output: default@parquet_schema_evolution_partitions_struct@pname=3
+POSTHOOK: Lineage: parquet_schema_evolution_partitions_struct PARTITION(pname=3).f EXPRESSION []
+PREHOOK: query: SELECT * FROM parquet_schema_evolution_partitions_struct
+PREHOOK: type: QUERY
+PREHOOK: Input: default@parquet_schema_evolution_partitions_struct
+PREHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=1
+PREHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=2
+PREHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=3
+#### A masked pattern was here ####
+POSTHOOK: query: SELECT * FROM parquet_schema_evolution_partitions_struct
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_struct
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=1
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=2
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=3
+#### A masked pattern was here ####
+{"col2":null,"col1":1.0,"col0":1}	1
+{"col2":null,"col1":2.0,"col0":2}	2
+{"col2":"three","col1":3.0,"col0":3}	3
+PREHOOK: query: ALTER TABLE parquet_schema_evolution_partitions_struct change column f f struct<col2:string,col0:int>
+PREHOOK: type: ALTERTABLE_RENAMECOL
+PREHOOK: Input: default@parquet_schema_evolution_partitions_struct
+PREHOOK: Output: default@parquet_schema_evolution_partitions_struct
+POSTHOOK: query: ALTER TABLE parquet_schema_evolution_partitions_struct change column f f struct<col2:string,col0:int>
+POSTHOOK: type: ALTERTABLE_RENAMECOL
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_struct
+POSTHOOK: Output: default@parquet_schema_evolution_partitions_struct
+PREHOOK: query: INSERT INTO TABLE parquet_schema_evolution_partitions_struct PARTITION (pname='4')
+  SELECT named_struct('col2', 'four', 'col0', 4)
+PREHOOK: type: QUERY
+PREHOOK: Input: _dummy_database@_dummy_table
+PREHOOK: Output: default@parquet_schema_evolution_partitions_struct@pname=4
+POSTHOOK: query: INSERT INTO TABLE parquet_schema_evolution_partitions_struct PARTITION (pname='4')
+  SELECT named_struct('col2', 'four', 'col0', 4)
+POSTHOOK: type: QUERY
+POSTHOOK: Input: _dummy_database@_dummy_table
+POSTHOOK: Output: default@parquet_schema_evolution_partitions_struct@pname=4
+POSTHOOK: Lineage: parquet_schema_evolution_partitions_struct PARTITION(pname=4).f EXPRESSION []
+PREHOOK: query: SELECT * FROM parquet_schema_evolution_partitions_struct
+PREHOOK: type: QUERY
+PREHOOK: Input: default@parquet_schema_evolution_partitions_struct
+PREHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=1
+PREHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=2
+PREHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=3
+PREHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=4
+#### A masked pattern was here ####
+POSTHOOK: query: SELECT * FROM parquet_schema_evolution_partitions_struct
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_struct
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=1
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=2
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=3
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_struct@pname=4
+#### A masked pattern was here ####
+{"col2":null,"col0":1}	1
+{"col2":null,"col0":2}	2
+{"col2":"three","col0":3}	3
+{"col2":"four","col0":4}	4
+PREHOOK: query: DROP TABLE parquet_schema_evolution_partitions
+PREHOOK: type: DROPTABLE
+PREHOOK: Input: default@parquet_schema_evolution_partitions
+PREHOOK: Output: default@parquet_schema_evolution_partitions
+POSTHOOK: query: DROP TABLE parquet_schema_evolution_partitions
+POSTHOOK: type: DROPTABLE
+POSTHOOK: Input: default@parquet_schema_evolution_partitions
+POSTHOOK: Output: default@parquet_schema_evolution_partitions
+PREHOOK: query: DROP TABLE parquet_schema_evolution_partitions_output
+PREHOOK: type: DROPTABLE
+PREHOOK: Input: default@parquet_schema_evolution_partitions_output
+PREHOOK: Output: default@parquet_schema_evolution_partitions_output
+POSTHOOK: query: DROP TABLE parquet_schema_evolution_partitions_output
+POSTHOOK: type: DROPTABLE
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_output
+POSTHOOK: Output: default@parquet_schema_evolution_partitions_output
+PREHOOK: query: DROP TABLE parquet_schema_evolution_partitions_struct
+PREHOOK: type: DROPTABLE
+PREHOOK: Input: default@parquet_schema_evolution_partitions_struct
+PREHOOK: Output: default@parquet_schema_evolution_partitions_struct
+POSTHOOK: query: DROP TABLE parquet_schema_evolution_partitions_struct
+POSTHOOK: type: DROPTABLE
+POSTHOOK: Input: default@parquet_schema_evolution_partitions_struct
+POSTHOOK: Output: default@parquet_schema_evolution_partitions_struct
