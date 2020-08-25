@@ -1439,10 +1439,6 @@ public class HiveConf extends Configuration {
         "However, if it is on, and the predicated number of entries in hashtable for a given join \n" +
         "input is larger than this number, the join will not be converted to a mapjoin. \n" +
         "The value \"-1\" means no limit."),
-
-    HIVE_STRUCT_SCHEMA_CONVERSION_BY_NAME("hive.struct.schema.name.access", false,
-            "If structs have diverged in the partition and table partitions, use name to resolve the struct."),
-
     HIVEHASHTABLEKEYCOUNTADJUSTMENT("hive.hashtable.key.count.adjustment", 1.0f,
         "Adjustment to mapjoin hashtable size derived from table and column statistics; the estimate" +
         " of the number of keys is divided by this value. If the value is 0, statistics are not used" +
