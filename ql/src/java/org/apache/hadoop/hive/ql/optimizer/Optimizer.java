@@ -72,7 +72,7 @@ public class Optimizer {
         Strings.nullToEmpty(HiveConf.getVar(hiveConf, HiveConf.ConfVars.POSTEXECHOOKS))));
     if (hiveConf.getBoolVar(HiveConf.ConfVars.HIVE_LINEAGE_INFO)
         || postExecHooks.contains("org.apache.hadoop.hive.ql.hooks.PostExecutePrinter")
-        || postExecHooks.contains("org.apache.hadoop.hive.ql.hooks.LineageLogger"))
+        || postExecHooks.contains("org.apache.hadoop.hive.ql.hooks.LineageLogger")) {
       transformations.add(new Generator());
     }
 
