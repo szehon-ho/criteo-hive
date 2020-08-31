@@ -4557,13 +4557,16 @@ public class HiveMetaStore extends ThriftHiveMetastore {
     @Override
     public List<String> partition_name_to_vals(String part_name)
         throws MetaException, TException {
-      if (part_name.length() == 0) {
-        return new ArrayList<String>();
+      startFunction("partition_name_to_vals", ":" + part_name);
+      List<String> partitionVals = new ArrayList<>();
+
+      if (!part_name.isEmpty()) {
+        LinkedHashMap<String, String> map = Warehouse.makeSpecFromName(part_name);
+        partitionVals.addAll(map.values());
       }
-      LinkedHashMap<String, String> map = Warehouse.makeSpecFromName(part_name);
-      List<String> part_vals = new ArrayList<String>();
-      part_vals.addAll(map.values());
-      return part_vals;
+
+      endFunction("partition_name_to_vals", true, null);
+      return partitionVals;
     }
 
     @Override
