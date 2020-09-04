@@ -22,8 +22,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hive.conf.HiveConf;
-import org.apache.hadoop.hive.ql.io.IOConstants;
 import org.apache.hadoop.hive.ql.io.parquet.convert.ParquetSchemaReader;
 import org.apache.hadoop.hive.ql.io.parquet.convert.ParquetToHiveSchemaConverter;
 //
@@ -118,22 +116,9 @@ public class ParquetHiveSerDe extends AbstractSerDe {
     final String columnTypeProperty = tbl.getProperty(serdeConstants.LIST_COLUMN_TYPES);
     final String columnNameDelimiter = tbl.containsKey(serdeConstants.COLUMN_NAME_DELIMITER) ? tbl
         .getProperty(serdeConstants.COLUMN_NAME_DELIMITER) : String.valueOf(SerDeUtils.COMMA);
-    final String schemaEvolutionColumnNames;
-    final String schemaEvolutionColumnTypes;
 
-    if (conf != null && HiveConf.getBoolVar(conf, HiveConf.ConfVars.HIVE_SCHEMA_EVOLUTION)) {
-      schemaEvolutionColumnNames = conf.get(IOConstants.SCHEMA_EVOLUTION_COLUMNS, "");
-      schemaEvolutionColumnTypes = conf.get(IOConstants.SCHEMA_EVOLUTION_COLUMNS_TYPES, "");
-    } else {
-      schemaEvolutionColumnNames = "";
-      schemaEvolutionColumnTypes = "";
-    }
 
-    if (!schemaEvolutionColumnNames.isEmpty() && !schemaEvolutionColumnTypes.isEmpty()) {
-      columnNames = Arrays.asList(schemaEvolutionColumnNames.split(","));
-      columnTypes = TypeInfoUtils.getTypeInfosFromTypeString(schemaEvolutionColumnTypes);
-    } else if (columnNameProperty.length() == 0 && columnTypeProperty.length() == 0) {
-
+    if (columnNameProperty.length() == 0 && columnTypeProperty.length() == 0) {
         final String locationProperty = tbl.getProperty("location", null);
         Path parquetFile = locationProperty != null ? getParquetFile(conf,
             new Path(locationProperty)) : null;

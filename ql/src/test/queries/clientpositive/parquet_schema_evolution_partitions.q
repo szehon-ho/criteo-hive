@@ -31,7 +31,7 @@ SELECT * FROM parquet_schema_evolution_partitions;
 
 -- Change some types to a compatible supertype
 ALTER TABLE parquet_schema_evolution_partitions replace columns (col2 string, col1 array<bigint>, col0 bigint);
-INSERT INTO TABLE parquet_schema_evolution_partitions PARTITION (pname='3')
+INSERT INTO TABLE parquet_schema_evolution_partitions PARTITION (pname='4')
   SELECT 'four', array(cast(7 as bigint), 8, 9), 4;
 
 
@@ -74,6 +74,12 @@ INSERT INTO TABLE parquet_schema_evolution_partitions_struct PARTITION (pname='4
   SELECT named_struct('col2', 'four', 'col0', 4);
 
 SELECT * FROM parquet_schema_evolution_partitions_struct;
+
+-- Select from both table in a single MR job to make sure mappers reading a table do not use the schema of the other
+SELECT t1.*, t2.f
+FROM parquet_schema_evolution_partitions t1
+JOIN parquet_schema_evolution_partitions_struct t2
+  ON t1.pname = t2.pname;
 
 -- Clean up
 DROP TABLE parquet_schema_evolution_partitions;
