@@ -1052,7 +1052,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
     @Override
     public void alter_database(final String dbName, final Database db)
         throws NoSuchObjectException, TException, MetaException {
-      startFunction("alter_database" + dbName);
+      startFunction("alter_database", ": " + dbName);
       boolean success = false;
       Exception ex = null;
       try {
