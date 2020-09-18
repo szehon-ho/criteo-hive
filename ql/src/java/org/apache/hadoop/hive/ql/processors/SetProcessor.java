@@ -56,7 +56,7 @@ public class SetProcessor implements CommandProcessor {
   private static final Set<String> removedConfigs =
       Sets.newHashSet("hive.mapred.supports.subdirectories",
           "hive.enforce.sorting","hive.enforce.bucketing",
-          "hive.outerjoin.supports.filters");
+          "hive.outerjoin.supports.filters", "hive.struct.schema.name.access");
   // Allow the user to set the ORC properties without getting an error.
   static {
     for(OrcConf var: OrcConf.values()) {
@@ -248,10 +248,10 @@ public class SetProcessor implements CommandProcessor {
       if (!"spark".equals(value)) {
         SessionState.get().closeSparkSession();
       }
-      if ("mr".equals(value)) {
-        result = HiveConf.generateMrDeprecationWarning();
-        LOG.warn(result);
-      }
+//      if ("mr".equals(value)) {
+//        result = HiveConf.generateMrDeprecationWarning();
+//        LOG.warn(result);
+//      }
     }
     if (register) {
       SessionState.get().getOverriddenConfigurations().put(key, value);

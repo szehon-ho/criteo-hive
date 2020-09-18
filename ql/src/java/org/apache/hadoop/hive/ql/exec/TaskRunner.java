@@ -21,8 +21,8 @@ package org.apache.hadoop.hive.ql.exec;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.hadoop.hive.common.LogUtils;
 import org.apache.hadoop.hive.ql.metadata.Hive;
-import org.apache.hadoop.hive.ql.session.OperationLog;
 import org.apache.hadoop.hive.ql.session.SessionState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,6 @@ public class TaskRunner extends Thread {
   protected Task<? extends Serializable> tsk;
   protected TaskResult result;
   protected SessionState ss;
-  private OperationLog operationLog;
   private static AtomicLong taskCounter = new AtomicLong(0);
   private static ThreadLocal<Long> taskRunnerID = new ThreadLocal<Long>() {
     @Override
@@ -74,8 +73,8 @@ public class TaskRunner extends Thread {
   public void run() {
     runner = Thread.currentThread();
     try {
-      OperationLog.setCurrentOperationLog(operationLog);
       SessionState.start(ss);
+      LogUtils.registerLoggingContext(ss.getConf());
       runSequential();
     } finally {
       try {
@@ -85,6 +84,7 @@ public class TaskRunner extends Thread {
       } catch (Exception e) {
         LOG.warn("Exception closing Metastore connection:" + e.getMessage());
       }
+      LogUtils.unregisterLoggingContext();
       runner = null;
       result.setRunning(false);
     }
@@ -112,9 +112,5 @@ public class TaskRunner extends Thread {
 
   public static long getTaskRunnerID () {
     return taskRunnerID.get();
-  }
-
-  public void setOperationLog(OperationLog operationLog) {
-    this.operationLog = operationLog;
   }
 }

@@ -33,6 +33,23 @@ POSTHOOK: type: QUERY
 POSTHOOK: Input: default@parquet_array_of_multi_field_structs_gen_schema
 #### A masked pattern was here ####
 [{"latitude":0.0,"longitude":0.0},{"latitude":0.0,"longitude":180.0}]
+PREHOOK: query: alter table parquet_array_of_multi_field_structs_gen_schema add columns (test string)
+PREHOOK: type: ALTERTABLE_ADDCOLS
+PREHOOK: Input: default@parquet_array_of_multi_field_structs_gen_schema
+PREHOOK: Output: default@parquet_array_of_multi_field_structs_gen_schema
+POSTHOOK: query: alter table parquet_array_of_multi_field_structs_gen_schema add columns (test string)
+POSTHOOK: type: ALTERTABLE_ADDCOLS
+POSTHOOK: Input: default@parquet_array_of_multi_field_structs_gen_schema
+POSTHOOK: Output: default@parquet_array_of_multi_field_structs_gen_schema
+PREHOOK: query: SELECT * FROM parquet_array_of_multi_field_structs_gen_schema
+PREHOOK: type: QUERY
+PREHOOK: Input: default@parquet_array_of_multi_field_structs_gen_schema
+#### A masked pattern was here ####
+POSTHOOK: query: SELECT * FROM parquet_array_of_multi_field_structs_gen_schema
+POSTHOOK: type: QUERY
+POSTHOOK: Input: default@parquet_array_of_multi_field_structs_gen_schema
+#### A masked pattern was here ####
+[{"latitude":0.0,"longitude":0.0},{"latitude":0.0,"longitude":180.0}]	NULL
 PREHOOK: query: DROP TABLE parquet_array_of_multi_field_structs_gen_schema
 PREHOOK: type: DROPTABLE
 PREHOOK: Input: default@parquet_array_of_multi_field_structs_gen_schema

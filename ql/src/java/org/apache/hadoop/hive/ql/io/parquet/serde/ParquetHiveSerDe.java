@@ -22,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hive.conf.HiveConf.ConfVars;
 import org.apache.hadoop.hive.ql.io.parquet.convert.ParquetSchemaReader;
 import org.apache.hadoop.hive.ql.io.parquet.convert.ParquetToHiveSchemaConverter;
 //
@@ -31,7 +30,6 @@ import org.apache.hadoop.hive.ql.io.parquet.convert.ParquetToHiveSchemaConverter
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +38,6 @@ import java.util.Properties;
 import com.google.common.base.Preconditions;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hive.ql.metadata.VirtualColumn;
 import org.apache.hadoop.hive.ql.optimizer.FieldNode;
 import org.apache.hadoop.hive.serde.serdeConstants;
 import org.apache.hadoop.hive.serde2.AbstractSerDe;
@@ -52,7 +49,6 @@ import org.apache.hadoop.hive.serde2.SerDeUtils;
 import org.apache.hadoop.hive.serde2.io.ParquetHiveRecord;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector.Category;
-import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorConverters;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
@@ -61,7 +57,6 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils;
 import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.util.StringUtils;
 import org.apache.parquet.hadoop.ParquetOutputFormat;
 
 /**
@@ -92,7 +87,6 @@ public class ParquetHiveSerDe extends AbstractSerDe {
 
   private SerDeStats stats;
   private ObjectInspector objInspector;
-  private ObjectInspectorConverters.Converter tableToPartitionConverter;
 
   private enum LAST_OPERATION {
     SERIALIZE,
@@ -192,50 +186,12 @@ public class ParquetHiveSerDe extends AbstractSerDe {
         prunedTypeInfo = pruneFromPaths(completeTypeInfo, prunedColumnPaths);
       }
     }
-
     this.objInspector = new ArrayWritableObjectInspector(completeTypeInfo, prunedTypeInfo);
-
-    if (conf != null) {
-      boolean resolveByName = conf.getBoolean(ConfVars.HIVE_STRUCT_SCHEMA_CONVERSION_BY_NAME.varname, false);
-      if (resolveByName) {
-        ObjectInspector tableOI = getTableObjectInspector(conf);
-        if (tableOI != null) {
-          this.tableToPartitionConverter = ObjectInspectorConverters.getConverter(tableOI, objInspector, conf);
-        }
-      }
-    }
-
-    if (this.tableToPartitionConverter == null) {
-      this.tableToPartitionConverter = new ObjectInspectorConverters.IdentityConverter();
-    }
 
     // Stats part
     serializedSize = 0;
     deserializedSize = 0;
     status = LAST_OPERATION.UNKNOWN;
-  }
-
-  private ObjectInspector getTableObjectInspector(final Configuration conf) {
-    final String columnNameProperty = conf.get(serdeConstants.LIST_COLUMNS);
-    final String columnTypeProperty = conf.get(serdeConstants.LIST_COLUMN_TYPES);
-
-    if (columnNameProperty == null || columnTypeProperty == null) {
-      return null;
-    }
-
-    List<String> columnNames = Collections.emptyList();
-    List<TypeInfo> columnTypes = Collections.emptyList();
-    if (!columnNameProperty.isEmpty()) {
-      columnNames = (List<String>) VirtualColumn.
-              removeVirtualColumns(StringUtils.getStringCollection(columnNameProperty));
-
-      if (!columnNames.isEmpty()) {
-        columnTypes = TypeInfoUtils.getTypeInfosFromTypeString(columnTypeProperty);
-      }
-    }
-
-    TypeInfo tableTypeInfo = TypeInfoFactory.getStructTypeInfo(columnNames, columnTypes);
-    return new ArrayWritableObjectInspector((StructTypeInfo) tableTypeInfo);
   }
 
   @Override
@@ -244,7 +200,7 @@ public class ParquetHiveSerDe extends AbstractSerDe {
     deserializedSize = 0;
     if (blob instanceof ArrayWritable) {
       deserializedSize = ((ArrayWritable) blob).get().length;
-      return tableToPartitionConverter.convert(blob);
+      return blob;
     } else {
       return null;
     }
@@ -425,5 +381,9 @@ public class ParquetHiveSerDe extends AbstractSerDe {
     }
 
     return null;
+  }
+
+  public boolean shouldStoreFieldsInMetastore(Map<String, String> tableParams) {
+    return true;
   }
 }

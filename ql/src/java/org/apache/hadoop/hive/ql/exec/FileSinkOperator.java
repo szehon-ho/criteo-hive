@@ -1016,7 +1016,7 @@ public class FileSinkOperator extends TerminalOperator<FileSinkDesc> implements
     LOG.info(toString() + ": records written - " + numRows);
 
     if (!bDynParts && !filesCreated) {
-      boolean skipFiles = "tez".equalsIgnoreCase(
+      boolean skipFiles = hconf != null && conf != null && "tez".equalsIgnoreCase(
           HiveConf.getVar(hconf, ConfVars.HIVE_EXECUTION_ENGINE));
       if (skipFiles) {
         Class<?> clazz = conf.getTableInfo().getOutputFileFormatClass();
@@ -1032,7 +1032,7 @@ public class FileSinkOperator extends TerminalOperator<FileSinkDesc> implements
       // If serializer is ThriftJDBCBinarySerDe, then it buffers rows to a certain limit (hive.server2.thrift.resultset.max.fetch.size)
       // and serializes the whole batch when the buffer is full. The serialize returns null if the buffer is not full
       // (the size of buffer is kept track of in the ThriftJDBCBinarySerDe).
-      if (conf.isUsingThriftJDBCBinarySerDe()) {
+      if (conf != null && conf.isUsingThriftJDBCBinarySerDe()) {
           try {
             recordValue = serializer.serialize(null, inputObjInspectors[0]);
             if ( null != fpaths ) {
@@ -1043,54 +1043,60 @@ public class FileSinkOperator extends TerminalOperator<FileSinkDesc> implements
             throw new HiveException(e);
           }
       }
-      for (FSPaths fsp : valToPaths.values()) {
-        fsp.closeWriters(abort);
-        // before closing the operator check if statistics gathering is requested
-        // and is provided by record writer. this is different from the statistics
-        // gathering done in processOp(). In processOp(), for each row added
-        // serde statistics about the row is gathered and accumulated in hashmap.
-        // this adds more overhead to the actual processing of row. But if the
-        // record writer already gathers the statistics, it can simply return the
-        // accumulated statistics which will be aggregated in case of spray writers
-        if (conf.isGatherStats() && isCollectRWStats) {
-          if (conf.getWriteType() == AcidUtils.Operation.NOT_ACID) {
-            for (int idx = 0; idx < fsp.outWriters.length; idx++) {
-              RecordWriter outWriter = fsp.outWriters[idx];
-              if (outWriter != null) {
-                SerDeStats stats = ((StatsProvidingRecordWriter) outWriter).getStats();
-                if (stats != null) {
-                  fsp.stat.addToStat(StatsSetupConst.RAW_DATA_SIZE, stats.getRawDataSize());
-                  fsp.stat.addToStat(StatsSetupConst.ROW_COUNT, stats.getRowCount());
+
+      if (valToPaths != null) {
+        for (FSPaths fsp : valToPaths.values()) {
+          fsp.closeWriters(abort);
+          // before closing the operator check if statistics gathering is requested
+          // and is provided by record writer. this is different from the statistics
+          // gathering done in processOp(). In processOp(), for each row added
+          // serde statistics about the row is gathered and accumulated in hashmap.
+          // this adds more overhead to the actual processing of row. But if the
+          // record writer already gathers the statistics, it can simply return the
+          // accumulated statistics which will be aggregated in case of spray writers
+          if (conf != null && conf.isGatherStats() && isCollectRWStats) {
+            if (conf.getWriteType() == AcidUtils.Operation.NOT_ACID) {
+              for (int idx = 0; idx < fsp.outWriters.length; idx++) {
+                RecordWriter outWriter = fsp.outWriters[idx];
+                if (outWriter != null) {
+                  SerDeStats stats = ((StatsProvidingRecordWriter) outWriter).getStats();
+                  if (stats != null) {
+                    fsp.stat.addToStat(StatsSetupConst.RAW_DATA_SIZE, stats.getRawDataSize());
+                    fsp.stat.addToStat(StatsSetupConst.ROW_COUNT, stats.getRowCount());
+                  }
                 }
               }
-            }
-          } else {
-            for (int i = 0; i < fsp.updaters.length; i++) {
-              if (fsp.updaters[i] != null) {
-                SerDeStats stats = fsp.updaters[i].getStats();
-                if (stats != null) {
-                  fsp.stat.addToStat(StatsSetupConst.RAW_DATA_SIZE, stats.getRawDataSize());
-                  fsp.stat.addToStat(StatsSetupConst.ROW_COUNT, stats.getRowCount());
+            } else {
+              for (int i = 0; i < fsp.updaters.length; i++) {
+                if (fsp.updaters[i] != null) {
+                  SerDeStats stats = fsp.updaters[i].getStats();
+                  if (stats != null) {
+                    fsp.stat.addToStat(StatsSetupConst.RAW_DATA_SIZE, stats.getRawDataSize());
+                    fsp.stat.addToStat(StatsSetupConst.ROW_COUNT, stats.getRowCount());
+                  }
                 }
               }
             }
           }
-        }
 
-        if (isNativeTable) {
-          fsp.commit(fs);
+          if (isNativeTable) {
+            fsp.commit(fs);
+          }
         }
       }
+
       // Only publish stats if this operator's flag was set to gather stats
-      if (conf.isGatherStats()) {
+      if (conf != null && conf.isGatherStats()) {
         publishStats();
       }
     } else {
       // Will come here if an Exception was thrown in map() or reduce().
       // Hadoop always call close() even if an Exception was thrown in map() or
       // reduce().
-      for (FSPaths fsp : valToPaths.values()) {
-        fsp.abortWriters(fs, abort, !autoDelete && isNativeTable);
+      if (valToPaths != null) {
+        for (FSPaths fsp : valToPaths.values()) {
+          fsp.abortWriters(fs, abort, !autoDelete && isNativeTable);
+        }
       }
     }
     fsp = prevFsp = null;

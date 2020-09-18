@@ -1439,10 +1439,6 @@ public class HiveConf extends Configuration {
         "However, if it is on, and the predicated number of entries in hashtable for a given join \n" +
         "input is larger than this number, the join will not be converted to a mapjoin. \n" +
         "The value \"-1\" means no limit."),
-
-    HIVE_STRUCT_SCHEMA_CONVERSION_BY_NAME("hive.struct.schema.name.access", false,
-            "If structs have diverged in the partition and table partitions, use name to resolve the struct."),
-
     HIVEHASHTABLEKEYCOUNTADJUSTMENT("hive.hashtable.key.count.adjustment", 1.0f,
         "Adjustment to mapjoin hashtable size derived from table and column statistics; the estimate" +
         " of the number of keys is divided by this value. If the value is 0, statistics are not used" +
@@ -3265,13 +3261,14 @@ public class HiveConf extends Configuration {
         "logger used for llap-daemons."),
 
     SPARK_USE_OP_STATS("hive.spark.use.op.stats", true,
-        "Whether to use operator stats to determine reducer parallelism for Hive on Spark. "
-            + "If this is false, Hive will use source table stats to determine reducer "
-            + "parallelism for all first level reduce tasks, and the maximum reducer parallelism "
-            + "from all parents for all the rest (second level and onward) reducer tasks."),
-    SPARK_USE_FILE_SIZE_FOR_MAPJOIN("hive.spark.use.file.size.for.mapjoin", false,
-        "If this is set to true, mapjoin optimization in Hive/Spark will use source file sizes associated "
-            + "with TableScan operator on the root of operator tree, instead of using operator statistics."),
+        "Whether to use operator stats to determine reducer parallelism for Hive on Spark.\n" +
+        "If this is false, Hive will use source table stats to determine reducer\n" +
+        "parallelism for all first level reduce tasks, and the maximum reducer parallelism\n" +
+        "from all parents for all the rest (second level and onward) reducer tasks."),
+    SPARK_USE_TS_STATS_FOR_MAPJOIN("hive.spark.use.ts.stats.for.mapjoin", false,
+        "If this is set to true, mapjoin optimization in Hive/Spark will use statistics from\n" +
+        "TableScan operators at the root of operator tree, instead of parent ReduceSink\n" +
+        "operators of the Join operator."),
     SPARK_CLIENT_FUTURE_TIMEOUT("hive.spark.client.future.timeout",
       "60s", new TimeValidator(TimeUnit.SECONDS),
       "Timeout for requests from Hive client to remote Spark driver."),
@@ -3393,7 +3390,9 @@ public class HiveConf extends Configuration {
             "This parameter enables a number of optimizations when running on blobstores:\n" +
             "(1) If hive.blobstore.use.blobstore.as.scratchdir is false, force the last Hive job to write to the blobstore.\n" +
             "This is a performance optimization that forces the final FileSinkOperator to write to the blobstore.\n" +
-            "See HIVE-15121 for details.");
+            "See HIVE-15121 for details."),
+
+    HIVE_LINEAGE_INFO("hive.lineage.hook.info.enabled", false, "Whether Hive provides lineage information to hooks.");
 
     public final String varname;
     public final String altName;

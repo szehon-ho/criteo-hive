@@ -346,12 +346,21 @@ public class DataWritableReadSupport extends ReadSupport<ArrayWritable> {
     Configuration configuration = context.getConfiguration();
     MessageType fileSchema = context.getFileSchema();
     String columnNames = configuration.get(IOConstants.COLUMNS);
+    String columnTypes = configuration.get(IOConstants.COLUMNS_TYPES);
     Map<String, String> contextMetadata = new HashMap<String, String>();
     boolean indexAccess = configuration.getBoolean(PARQUET_COLUMN_INDEX_ACCESS, false);
 
+    if (HiveConf.getBoolVar(configuration, HiveConf.ConfVars.HIVE_SCHEMA_EVOLUTION)) {
+      String schemaEvolutionColumnNames = configuration.get(IOConstants.SCHEMA_EVOLUTION_COLUMNS, "");
+      String schemaEvolutionColumnTypes = configuration.get(IOConstants.SCHEMA_EVOLUTION_COLUMNS_TYPES, "");
+      if (!schemaEvolutionColumnNames.isEmpty() && !schemaEvolutionColumnTypes.isEmpty()) {
+        columnNames = schemaEvolutionColumnNames;
+        columnTypes = schemaEvolutionColumnTypes;
+      }
+    }
+
     if (columnNames != null) {
       List<String> columnNamesList = getColumnNames(columnNames);
-      String columnTypes = configuration.get(IOConstants.COLUMNS_TYPES);
       List<TypeInfo> columnTypesList = getColumnTypes(columnTypes);
 
       MessageType tableSchema;
@@ -412,9 +421,6 @@ public class DataWritableReadSupport extends ReadSupport<ArrayWritable> {
       metadata.put(key, String.valueOf(HiveConf.getBoolVar(
         configuration, HiveConf.ConfVars.HIVE_PARQUET_TIMESTAMP_SKIP_CONVERSION)));
     }
-    String key2 = HiveConf.ConfVars.HIVE_STRUCT_SCHEMA_CONVERSION_BY_NAME.varname;
-    metadata.put(key2, String.valueOf(HiveConf.getBoolVar(
-      configuration, HiveConf.ConfVars.HIVE_STRUCT_SCHEMA_CONVERSION_BY_NAME)));
     return new DataWritableRecordConverter(readContext.getRequestedSchema(), metadata, hiveTypeInfo);
   }
 }

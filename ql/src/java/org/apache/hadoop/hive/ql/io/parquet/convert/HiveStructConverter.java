@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.ql.io.parquet.read.DataWritableReadSupport;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.*;
@@ -44,13 +43,6 @@ public class HiveStructConverter extends HiveGroupConverter {
   private List<String> hiveFieldNames;
   private List<TypeInfo> hiveFieldTypeInfos;
 
-  private boolean keepNestedIndices;
-
-  public static boolean getKeepNestedIndices(Map<String, String> metadata) {
-    return Boolean.parseBoolean(
-            metadata.get(HiveConf.ConfVars.HIVE_STRUCT_SCHEMA_CONVERSION_BY_NAME.varname));
-  }
-
   public HiveStructConverter(final GroupType requestedSchema, final GroupType tableSchema,
                              Map<String, String> metadata, TypeInfo hiveTypeInfo) {
     setMetadata(metadata);
@@ -59,7 +51,6 @@ public class HiveStructConverter extends HiveGroupConverter {
     this.parent = null;
     this.index = 0;
     this.totalFieldCount = tableSchema.getFieldCount();
-    this.keepNestedIndices = getKeepNestedIndices(metadata);
     init(requestedSchema, null, 0, tableSchema, hiveTypeInfo);
   }
 
@@ -73,7 +64,6 @@ public class HiveStructConverter extends HiveGroupConverter {
     this.parent = parent;
     this.index = index;
     this.totalFieldCount = containingGroupType.getFieldCount();
-    this.keepNestedIndices = getKeepNestedIndices(parent.getMetadata());
     init(selectedGroupType, parent, index, containingGroupType, hiveTypeInfo);
   }
 
@@ -98,12 +88,7 @@ public class HiveStructConverter extends HiveGroupConverter {
       if (isSubType(containingGroupType, subtype)) {
         int fieldIndex = containingGroupType.getFieldIndex(subtype.getName());
         TypeInfo _hiveTypeInfo = getFieldTypeIgnoreCase(hiveTypeInfo, subtype.getName(), fieldIndex);
-        if (this.keepNestedIndices) {
-          converters[i] = getFieldConverter(subtype, containingGroupType.getType(fieldIndex), fieldIndex, _hiveTypeInfo);
-        }
-        else {
-          converters[i] = getFieldConverter(subtype, subtype, fieldIndex, _hiveTypeInfo);
-        }
+        converters[i] = getFieldConverter(subtype, fieldIndex, _hiveTypeInfo);
       } else {
         throw new IllegalStateException("Group type [" + containingGroupType +
             "] does not contain requested field: " + subtype);
@@ -175,7 +160,7 @@ public class HiveStructConverter extends HiveGroupConverter {
     return null;
   }
 
-  private Converter getFieldConverter(Type type, Type containingGroupType, int fieldIndex, TypeInfo hiveTypeInfo) {
+  private Converter getFieldConverter(Type type, int fieldIndex, TypeInfo hiveTypeInfo) {
     Converter converter;
     if (type.isRepetition(Type.Repetition.REPEATED)) {
       if (type.isPrimitive()) {
@@ -183,13 +168,13 @@ public class HiveStructConverter extends HiveGroupConverter {
             type.asPrimitiveType(), this, fieldIndex, hiveTypeInfo);
       } else {
         converter = new Repeated.RepeatedGroupConverter(
-            type.asGroupType(), containingGroupType.asGroupType(), this, fieldIndex, hiveTypeInfo == null ? null : ((ListTypeInfo) hiveTypeInfo)
+            type.asGroupType(), this, fieldIndex, hiveTypeInfo == null ? null : ((ListTypeInfo) hiveTypeInfo)
             .getListElementTypeInfo());
       }
 
       repeatedConverters.add((Repeated) converter);
     } else {
-      converter = getConverterFromDescription(type, containingGroupType, fieldIndex, this, hiveTypeInfo);
+      converter = getConverterFromDescription(type, fieldIndex, this, hiveTypeInfo);
     }
 
     return converter;

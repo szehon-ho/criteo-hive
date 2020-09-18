@@ -193,7 +193,7 @@ public class MapOperator extends AbstractMapOperator {
     }
 
     opCtx.partTblObjectInspectorConverter =
-        ObjectInspectorConverters.getConverter(partRawRowObjectInspector, tableRowOI, hconf);
+        ObjectInspectorConverters.getConverter(partRawRowObjectInspector, tableRowOI);
 
     // Next check if this table has partitions and if so
     // get the list of partition names as well as allocate
