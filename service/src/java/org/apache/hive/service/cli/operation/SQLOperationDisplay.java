@@ -38,6 +38,8 @@ public class SQLOperationDisplay {
   public OperationState state;
   public QueryDisplay queryDisplay;
 
+  private String operationLogLocation;
+
   public SQLOperationDisplay(SQLOperation sqlOperation) throws HiveSQLException {
     this.state = sqlOperation.getState();
     this.userName = sqlOperation.getParentSession().getUserName();
@@ -104,5 +106,13 @@ public class SQLOperationDisplay {
 
   public synchronized Long getRuntime() {
     return runtime;
+  }
+
+  public String getOperationLogLocation() {
+    return operationLogLocation;
+  }
+
+  public void setOperationLogLocation(String operationLogLocation) {
+    this.operationLogLocation = operationLogLocation;
   }
 }
