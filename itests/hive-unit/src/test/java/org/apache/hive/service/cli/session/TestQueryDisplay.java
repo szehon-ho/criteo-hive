@@ -252,13 +252,17 @@ public class TestQueryDisplay {
    * assert each element, to make it easier to add UI improvements.
    */
   private void verifyDDLHtml(String stmt, String opHandle) throws Exception {
-    StringWriter sw = new StringWriter();
-    SQLOperationDisplay sod = sessionManager.getOperationManager().getSQLOperationDisplay(
-      opHandle);
-    new QueryProfileTmpl().render(sw, sod);
-    String html = sw.toString();
+    verifyDDLHtml(stmt, opHandle, true);
+  }
 
-    Assert.assertTrue(html.contains(stmt));
+  private void verifyDDLHtml(String stmt, String opHandle, boolean assertCondition) throws Exception {
+    StringWriter sw = new StringWriter();
+    SQLOperationDisplay sod = sessionManager.getOperationManager().getSQLOperationDisplay(opHandle);
+    HiveConf hiveConf = sessionManager.getOperationManager().getHiveConf();
+    new QueryProfileTmpl().render(sw, sod, hiveConf);
+    String html = sw.toString();
+    Assert.assertEquals(assertCondition, html.contains(stmt));
+
     Assert.assertTrue(html.contains("testuser"));
   }
 
