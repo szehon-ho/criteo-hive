@@ -234,15 +234,15 @@ POSTHOOK: Input: default@flights_tiny_orc
 #### A masked pattern was here ####
 2010-10-20	11
 2010-10-21	12
-2010-10-22	11
+2010-10-26	13
+2010-10-30	11
 2010-10-23	12
 2010-10-24	12
 2010-10-25	12
-2010-10-26	13
-2010-10-27	11
+2010-10-22	11
 2010-10-28	12
 2010-10-29	12
-2010-10-30	11
+2010-10-27	11
 2010-10-31	8
 PREHOOK: query: explain vectorization expression
 select * from flights_tiny_orc sort by fl_num, fl_date limit 25
@@ -271,7 +271,7 @@ STAGE PLANS:
             Map Operator Tree:
                 TableScan
                   alias: flights_tiny_orc
-                  Statistics: Num rows: 137 Data size: 39456 Basic stats: COMPLETE Column stats: NONE
+                  Statistics: Num rows: 137 Data size: 62304 Basic stats: COMPLETE Column stats: NONE
                   TableScan Vectorization:
                       native: true
                       projectedOutputColumns: [0, 1, 2, 3, 4, 5]
@@ -282,16 +282,15 @@ STAGE PLANS:
                         className: VectorSelectOperator
                         native: true
                         projectedOutputColumns: [0, 1, 2, 3, 4, 5]
-                    Statistics: Num rows: 137 Data size: 39456 Basic stats: COMPLETE Column stats: NONE
+                    Statistics: Num rows: 137 Data size: 62304 Basic stats: COMPLETE Column stats: NONE
                     Reduce Output Operator
                       key expressions: _col5 (type: int), _col2 (type: date)
                       sort order: ++
                       Reduce Sink Vectorization:
-                          className: VectorReduceSinkOperator
-                          native: false
-                          nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                          nativeConditionsNotMet: No TopN IS false
-                      Statistics: Num rows: 137 Data size: 39456 Basic stats: COMPLETE Column stats: NONE
+                          className: VectorReduceSinkObjectHashOperator
+                          native: true
+                          nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                      Statistics: Num rows: 137 Data size: 62304 Basic stats: COMPLETE Column stats: NONE
                       TopN Hash Memory Usage: 0.1
                       value expressions: _col0 (type: string), _col1 (type: string), _col3 (type: timestamp), _col4 (type: float)
             Execution mode: vectorized, llap
@@ -301,7 +300,7 @@ STAGE PLANS:
                 enabledConditionsMet: hive.vectorized.use.vectorized.input.format IS true
                 groupByVectorOutput: true
                 inputFileFormats: org.apache.hadoop.hive.ql.io.orc.OrcInputFormat
-                allNative: false
+                allNative: true
                 usesVectorUDFAdaptor: false
                 vectorized: true
         Reducer 2 
@@ -310,7 +309,7 @@ STAGE PLANS:
                 enabled: true
                 enableConditionsMet: hive.vectorized.execution.reduce.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true
                 groupByVectorOutput: true
-                allNative: false
+                allNative: true
                 usesVectorUDFAdaptor: false
                 vectorized: true
             Reduce Operator Tree:
@@ -321,22 +320,21 @@ STAGE PLANS:
                     className: VectorSelectOperator
                     native: true
                     projectedOutputColumns: [2, 3, 1, 4, 5, 0]
-                Statistics: Num rows: 137 Data size: 39456 Basic stats: COMPLETE Column stats: NONE
+                Statistics: Num rows: 137 Data size: 62304 Basic stats: COMPLETE Column stats: NONE
                 Limit
                   Number of rows: 25
                   Limit Vectorization:
                       className: VectorLimitOperator
                       native: true
-                  Statistics: Num rows: 25 Data size: 7200 Basic stats: COMPLETE Column stats: NONE
+                  Statistics: Num rows: 25 Data size: 11350 Basic stats: COMPLETE Column stats: NONE
                   Reduce Output Operator
                     key expressions: _col5 (type: int), _col2 (type: date)
                     sort order: ++
                     Reduce Sink Vectorization:
-                        className: VectorReduceSinkOperator
-                        native: false
-                        nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                        nativeConditionsNotMet: No TopN IS false
-                    Statistics: Num rows: 25 Data size: 7200 Basic stats: COMPLETE Column stats: NONE
+                        className: VectorReduceSinkObjectHashOperator
+                        native: true
+                        nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                    Statistics: Num rows: 25 Data size: 11350 Basic stats: COMPLETE Column stats: NONE
                     TopN Hash Memory Usage: 0.1
                     value expressions: _col0 (type: string), _col1 (type: string), _col3 (type: timestamp), _col4 (type: float)
         Reducer 3 
@@ -356,19 +354,19 @@ STAGE PLANS:
                     className: VectorSelectOperator
                     native: true
                     projectedOutputColumns: [2, 3, 1, 4, 5, 0]
-                Statistics: Num rows: 25 Data size: 7200 Basic stats: COMPLETE Column stats: NONE
+                Statistics: Num rows: 25 Data size: 11350 Basic stats: COMPLETE Column stats: NONE
                 Limit
                   Number of rows: 25
                   Limit Vectorization:
                       className: VectorLimitOperator
                       native: true
-                  Statistics: Num rows: 25 Data size: 7200 Basic stats: COMPLETE Column stats: NONE
+                  Statistics: Num rows: 25 Data size: 11350 Basic stats: COMPLETE Column stats: NONE
                   File Output Operator
                     compressed: false
                     File Sink Vectorization:
                         className: VectorFileSinkOperator
                         native: false
-                    Statistics: Num rows: 25 Data size: 7200 Basic stats: COMPLETE Column stats: NONE
+                    Statistics: Num rows: 25 Data size: 11350 Basic stats: COMPLETE Column stats: NONE
                     table:
                         input format: org.apache.hadoop.mapred.SequenceFileInputFormat
                         output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat
@@ -439,7 +437,7 @@ STAGE PLANS:
             Map Operator Tree:
                 TableScan
                   alias: flights_tiny_orc
-                  Statistics: Num rows: 137 Data size: 39456 Basic stats: COMPLETE Column stats: NONE
+                  Statistics: Num rows: 137 Data size: 7392 Basic stats: COMPLETE Column stats: NONE
                   TableScan Vectorization:
                       native: true
                       projectedOutputColumns: [0, 1, 2, 3, 4, 5]
@@ -450,20 +448,22 @@ STAGE PLANS:
                         className: VectorSelectOperator
                         native: true
                         projectedOutputColumns: [2]
-                    Statistics: Num rows: 137 Data size: 39456 Basic stats: COMPLETE Column stats: NONE
+                    Statistics: Num rows: 137 Data size: 7392 Basic stats: COMPLETE Column stats: NONE
                     Group By Operator
                       aggregations: count()
                       Group By Vectorization:
                           aggregators: VectorUDAFCountStar(*) -> bigint
                           className: VectorGroupByOperator
+                          groupByMode: HASH
                           vectorOutput: true
                           keyExpressions: col 2
                           native: false
+                          vectorProcessingMode: HASH
                           projectedOutputColumns: [0]
                       keys: fl_date (type: date)
                       mode: hash
                       outputColumnNames: _col0, _col1
-                      Statistics: Num rows: 137 Data size: 39456 Basic stats: COMPLETE Column stats: NONE
+                      Statistics: Num rows: 137 Data size: 7392 Basic stats: COMPLETE Column stats: NONE
                       Reduce Output Operator
                         key expressions: _col0 (type: date)
                         sort order: +
@@ -471,8 +471,8 @@ STAGE PLANS:
                         Reduce Sink Vectorization:
                             className: VectorReduceSinkMultiKeyOperator
                             native: true
-                            nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                        Statistics: Num rows: 137 Data size: 39456 Basic stats: COMPLETE Column stats: NONE
+                            nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                        Statistics: Num rows: 137 Data size: 7392 Basic stats: COMPLETE Column stats: NONE
                         value expressions: _col1 (type: bigint)
             Execution mode: vectorized, llap
             LLAP IO: all inputs
@@ -499,20 +499,22 @@ STAGE PLANS:
                 Group By Vectorization:
                     aggregators: VectorUDAFCountMerge(col 1) -> bigint
                     className: VectorGroupByOperator
+                    groupByMode: MERGEPARTIAL
                     vectorOutput: true
                     keyExpressions: col 0
                     native: false
+                    vectorProcessingMode: MERGE_PARTIAL
                     projectedOutputColumns: [0]
                 keys: KEY._col0 (type: date)
                 mode: mergepartial
                 outputColumnNames: _col0, _col1
-                Statistics: Num rows: 68 Data size: 19584 Basic stats: COMPLETE Column stats: NONE
+                Statistics: Num rows: 68 Data size: 3669 Basic stats: COMPLETE Column stats: NONE
                 File Output Operator
                   compressed: false
                   File Sink Vectorization:
                       className: VectorFileSinkOperator
                       native: false
-                  Statistics: Num rows: 68 Data size: 19584 Basic stats: COMPLETE Column stats: NONE
+                  Statistics: Num rows: 68 Data size: 3669 Basic stats: COMPLETE Column stats: NONE
                   table:
                       input format: org.apache.hadoop.mapred.SequenceFileInputFormat
                       output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat
@@ -534,15 +536,15 @@ POSTHOOK: Input: default@flights_tiny_orc
 #### A masked pattern was here ####
 2010-10-20	11
 2010-10-21	12
-2010-10-22	11
+2010-10-26	13
+2010-10-30	11
 2010-10-23	12
 2010-10-24	12
 2010-10-25	12
-2010-10-26	13
-2010-10-27	11
+2010-10-22	11
 2010-10-28	12
 2010-10-29	12
-2010-10-30	11
+2010-10-27	11
 2010-10-31	8
 PREHOOK: query: CREATE TABLE flights_tiny_orc_partitioned_date (
   origin_city_name STRING,
@@ -913,15 +915,15 @@ POSTHOOK: Input: default@flights_tiny_orc_partitioned_date@fl_date=2010-10-31
 #### A masked pattern was here ####
 2010-10-20	11
 2010-10-21	12
-2010-10-22	11
+2010-10-26	13
+2010-10-30	11
 2010-10-23	12
 2010-10-24	12
 2010-10-25	12
-2010-10-26	13
-2010-10-27	11
+2010-10-22	11
 2010-10-28	12
 2010-10-29	12
-2010-10-30	11
+2010-10-27	11
 2010-10-31	8
 PREHOOK: query: explain vectorization expression
 select * from flights_tiny_orc_partitioned_date
@@ -946,7 +948,7 @@ STAGE PLANS:
             Map Operator Tree:
                 TableScan
                   alias: flights_tiny_orc_partitioned_date
-                  Statistics: Num rows: 137 Data size: 39448 Basic stats: COMPLETE Column stats: PARTIAL
+                  Statistics: Num rows: 137 Data size: 94360 Basic stats: COMPLETE Column stats: PARTIAL
                   TableScan Vectorization:
                       native: true
                       projectedOutputColumns: [0, 1, 2, 3, 4, 5]
@@ -957,13 +959,13 @@ STAGE PLANS:
                         className: VectorSelectOperator
                         native: true
                         projectedOutputColumns: [0, 1, 2, 3, 4, 5]
-                    Statistics: Num rows: 137 Data size: 7672 Basic stats: COMPLETE Column stats: PARTIAL
+                    Statistics: Num rows: 137 Data size: 62584 Basic stats: COMPLETE Column stats: PARTIAL
                     File Output Operator
                       compressed: false
                       File Sink Vectorization:
                           className: VectorFileSinkOperator
                           native: false
-                      Statistics: Num rows: 137 Data size: 7672 Basic stats: COMPLETE Column stats: PARTIAL
+                      Statistics: Num rows: 137 Data size: 62584 Basic stats: COMPLETE Column stats: PARTIAL
                       table:
                           input format: org.apache.hadoop.mapred.SequenceFileInputFormat
                           output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat
@@ -1181,7 +1183,7 @@ STAGE PLANS:
             Map Operator Tree:
                 TableScan
                   alias: flights_tiny_orc_partitioned_date
-                  Statistics: Num rows: 137 Data size: 39448 Basic stats: COMPLETE Column stats: PARTIAL
+                  Statistics: Num rows: 137 Data size: 94360 Basic stats: COMPLETE Column stats: PARTIAL
                   TableScan Vectorization:
                       native: true
                       projectedOutputColumns: [0, 1, 2, 3, 4, 5]
@@ -1192,16 +1194,15 @@ STAGE PLANS:
                         className: VectorSelectOperator
                         native: true
                         projectedOutputColumns: [0, 1, 2, 3, 4, 5]
-                    Statistics: Num rows: 137 Data size: 39448 Basic stats: COMPLETE Column stats: PARTIAL
+                    Statistics: Num rows: 137 Data size: 94360 Basic stats: COMPLETE Column stats: PARTIAL
                     Reduce Output Operator
                       key expressions: _col4 (type: int), _col5 (type: date)
                       sort order: ++
                       Reduce Sink Vectorization:
-                          className: VectorReduceSinkOperator
-                          native: false
-                          nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                          nativeConditionsNotMet: No TopN IS false
-                      Statistics: Num rows: 137 Data size: 39448 Basic stats: COMPLETE Column stats: PARTIAL
+                          className: VectorReduceSinkObjectHashOperator
+                          native: true
+                          nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                      Statistics: Num rows: 137 Data size: 94360 Basic stats: COMPLETE Column stats: PARTIAL
                       TopN Hash Memory Usage: 0.1
                       value expressions: _col0 (type: string), _col1 (type: string), _col2 (type: timestamp), _col3 (type: float)
             Execution mode: vectorized, llap
@@ -1211,7 +1212,7 @@ STAGE PLANS:
                 enabledConditionsMet: hive.vectorized.use.vectorized.input.format IS true
                 groupByVectorOutput: true
                 inputFileFormats: org.apache.hadoop.hive.ql.io.orc.OrcInputFormat
-                allNative: false
+                allNative: true
                 usesVectorUDFAdaptor: false
                 vectorized: true
         Reducer 2 
@@ -1220,7 +1221,7 @@ STAGE PLANS:
                 enabled: true
                 enableConditionsMet: hive.vectorized.execution.reduce.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true
                 groupByVectorOutput: true
-                allNative: false
+                allNative: true
                 usesVectorUDFAdaptor: false
                 vectorized: true
             Reduce Operator Tree:
@@ -1231,22 +1232,21 @@ STAGE PLANS:
                     className: VectorSelectOperator
                     native: true
                     projectedOutputColumns: [2, 3, 4, 5, 0, 1]
-                Statistics: Num rows: 137 Data size: 7672 Basic stats: COMPLETE Column stats: PARTIAL
+                Statistics: Num rows: 137 Data size: 62584 Basic stats: COMPLETE Column stats: PARTIAL
                 Limit
                   Number of rows: 25
                   Limit Vectorization:
                       className: VectorLimitOperator
                       native: true
-                  Statistics: Num rows: 25 Data size: 1400 Basic stats: COMPLETE Column stats: PARTIAL
+                  Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                   Reduce Output Operator
                     key expressions: _col4 (type: int), _col5 (type: date)
                     sort order: ++
                     Reduce Sink Vectorization:
-                        className: VectorReduceSinkOperator
-                        native: false
-                        nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                        nativeConditionsNotMet: No TopN IS false
-                    Statistics: Num rows: 25 Data size: 1400 Basic stats: COMPLETE Column stats: PARTIAL
+                        className: VectorReduceSinkObjectHashOperator
+                        native: true
+                        nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                    Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                     TopN Hash Memory Usage: 0.1
                     value expressions: _col0 (type: string), _col1 (type: string), _col2 (type: timestamp), _col3 (type: float)
         Reducer 3 
@@ -1266,19 +1266,19 @@ STAGE PLANS:
                     className: VectorSelectOperator
                     native: true
                     projectedOutputColumns: [2, 3, 4, 5, 0, 1]
-                Statistics: Num rows: 25 Data size: 1400 Basic stats: COMPLETE Column stats: PARTIAL
+                Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                 Limit
                   Number of rows: 25
                   Limit Vectorization:
                       className: VectorLimitOperator
                       native: true
-                  Statistics: Num rows: 25 Data size: 1400 Basic stats: COMPLETE Column stats: PARTIAL
+                  Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                   File Output Operator
                     compressed: false
                     File Sink Vectorization:
                         className: VectorFileSinkOperator
                         native: false
-                    Statistics: Num rows: 25 Data size: 1400 Basic stats: COMPLETE Column stats: PARTIAL
+                    Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                     table:
                         input format: org.apache.hadoop.mapred.SequenceFileInputFormat
                         output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat
@@ -1390,9 +1390,11 @@ STAGE PLANS:
                       Group By Vectorization:
                           aggregators: VectorUDAFCountStar(*) -> bigint
                           className: VectorGroupByOperator
+                          groupByMode: HASH
                           vectorOutput: true
                           keyExpressions: col 5
                           native: false
+                          vectorProcessingMode: HASH
                           projectedOutputColumns: [0]
                       keys: fl_date (type: date)
                       mode: hash
@@ -1405,7 +1407,7 @@ STAGE PLANS:
                         Reduce Sink Vectorization:
                             className: VectorReduceSinkMultiKeyOperator
                             native: true
-                            nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                            nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
                         Statistics: Num rows: 12 Data size: 768 Basic stats: COMPLETE Column stats: COMPLETE
                         value expressions: _col1 (type: bigint)
             Execution mode: vectorized, llap
@@ -1433,9 +1435,11 @@ STAGE PLANS:
                 Group By Vectorization:
                     aggregators: VectorUDAFCountMerge(col 1) -> bigint
                     className: VectorGroupByOperator
+                    groupByMode: MERGEPARTIAL
                     vectorOutput: true
                     keyExpressions: col 0
                     native: false
+                    vectorProcessingMode: MERGE_PARTIAL
                     projectedOutputColumns: [0]
                 keys: KEY._col0 (type: date)
                 mode: mergepartial
@@ -1492,15 +1496,15 @@ POSTHOOK: Input: default@flights_tiny_orc_partitioned_date@fl_date=2010-10-31
 #### A masked pattern was here ####
 2010-10-20	11
 2010-10-21	12
-2010-10-22	11
+2010-10-26	13
+2010-10-30	11
 2010-10-23	12
 2010-10-24	12
 2010-10-25	12
-2010-10-26	13
-2010-10-27	11
+2010-10-22	11
 2010-10-28	12
 2010-10-29	12
-2010-10-30	11
+2010-10-27	11
 2010-10-31	8
 PREHOOK: query: CREATE TABLE flights_tiny_orc_partitioned_timestamp (
   origin_city_name STRING,
@@ -1870,17 +1874,17 @@ POSTHOOK: Input: default@flights_tiny_orc_partitioned_timestamp@fl_time=2010-10-
 POSTHOOK: Input: default@flights_tiny_orc_partitioned_timestamp@fl_time=2010-10-31 07%3A00%3A00
 #### A masked pattern was here ####
 2010-10-20 07:00:00	11
-2010-10-21 07:00:00	12
-2010-10-22 07:00:00	11
 2010-10-23 07:00:00	12
-2010-10-24 07:00:00	12
 2010-10-25 07:00:00	12
+2010-10-22 07:00:00	11
 2010-10-26 07:00:00	13
+2010-10-29 07:00:00	12
+2010-10-31 07:00:00	8
+2010-10-21 07:00:00	12
+2010-10-24 07:00:00	12
 2010-10-27 07:00:00	11
 2010-10-28 07:00:00	12
-2010-10-29 07:00:00	12
 2010-10-30 07:00:00	11
-2010-10-31 07:00:00	8
 PREHOOK: query: explain vectorization expression
 select * from flights_tiny_orc_partitioned_timestamp
 PREHOOK: type: QUERY
@@ -1904,7 +1908,7 @@ STAGE PLANS:
             Map Operator Tree:
                 TableScan
                   alias: flights_tiny_orc_partitioned_timestamp
-                  Statistics: Num rows: 137 Data size: 39448 Basic stats: COMPLETE Column stats: PARTIAL
+                  Statistics: Num rows: 137 Data size: 96472 Basic stats: COMPLETE Column stats: PARTIAL
                   TableScan Vectorization:
                       native: true
                       projectedOutputColumns: [0, 1, 2, 3, 4, 5]
@@ -1915,13 +1919,13 @@ STAGE PLANS:
                         className: VectorSelectOperator
                         native: true
                         projectedOutputColumns: [0, 1, 2, 3, 4, 5]
-                    Statistics: Num rows: 137 Data size: 5480 Basic stats: COMPLETE Column stats: PARTIAL
+                    Statistics: Num rows: 137 Data size: 62504 Basic stats: COMPLETE Column stats: PARTIAL
                     File Output Operator
                       compressed: false
                       File Sink Vectorization:
                           className: VectorFileSinkOperator
                           native: false
-                      Statistics: Num rows: 137 Data size: 5480 Basic stats: COMPLETE Column stats: PARTIAL
+                      Statistics: Num rows: 137 Data size: 62504 Basic stats: COMPLETE Column stats: PARTIAL
                       table:
                           input format: org.apache.hadoop.mapred.SequenceFileInputFormat
                           output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat
@@ -2139,7 +2143,7 @@ STAGE PLANS:
             Map Operator Tree:
                 TableScan
                   alias: flights_tiny_orc_partitioned_timestamp
-                  Statistics: Num rows: 137 Data size: 39448 Basic stats: COMPLETE Column stats: PARTIAL
+                  Statistics: Num rows: 137 Data size: 96472 Basic stats: COMPLETE Column stats: PARTIAL
                   TableScan Vectorization:
                       native: true
                       projectedOutputColumns: [0, 1, 2, 3, 4, 5]
@@ -2150,16 +2154,15 @@ STAGE PLANS:
                         className: VectorSelectOperator
                         native: true
                         projectedOutputColumns: [0, 1, 2, 3, 4, 5]
-                    Statistics: Num rows: 137 Data size: 39448 Basic stats: COMPLETE Column stats: PARTIAL
+                    Statistics: Num rows: 137 Data size: 96472 Basic stats: COMPLETE Column stats: PARTIAL
                     Reduce Output Operator
                       key expressions: _col4 (type: int), _col5 (type: timestamp)
                       sort order: ++
                       Reduce Sink Vectorization:
-                          className: VectorReduceSinkOperator
-                          native: false
-                          nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                          nativeConditionsNotMet: No TopN IS false
-                      Statistics: Num rows: 137 Data size: 39448 Basic stats: COMPLETE Column stats: PARTIAL
+                          className: VectorReduceSinkObjectHashOperator
+                          native: true
+                          nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                      Statistics: Num rows: 137 Data size: 96472 Basic stats: COMPLETE Column stats: PARTIAL
                       TopN Hash Memory Usage: 0.1
                       value expressions: _col0 (type: string), _col1 (type: string), _col2 (type: date), _col3 (type: float)
             Execution mode: vectorized, llap
@@ -2169,7 +2172,7 @@ STAGE PLANS:
                 enabledConditionsMet: hive.vectorized.use.vectorized.input.format IS true
                 groupByVectorOutput: true
                 inputFileFormats: org.apache.hadoop.hive.ql.io.orc.OrcInputFormat
-                allNative: false
+                allNative: true
                 usesVectorUDFAdaptor: false
                 vectorized: true
         Reducer 2 
@@ -2178,7 +2181,7 @@ STAGE PLANS:
                 enabled: true
                 enableConditionsMet: hive.vectorized.execution.reduce.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true
                 groupByVectorOutput: true
-                allNative: false
+                allNative: true
                 usesVectorUDFAdaptor: false
                 vectorized: true
             Reduce Operator Tree:
@@ -2189,22 +2192,21 @@ STAGE PLANS:
                     className: VectorSelectOperator
                     native: true
                     projectedOutputColumns: [2, 3, 4, 5, 0, 1]
-                Statistics: Num rows: 137 Data size: 5480 Basic stats: COMPLETE Column stats: PARTIAL
+                Statistics: Num rows: 137 Data size: 62504 Basic stats: COMPLETE Column stats: PARTIAL
                 Limit
                   Number of rows: 25
                   Limit Vectorization:
                       className: VectorLimitOperator
                       native: true
-                  Statistics: Num rows: 25 Data size: 1000 Basic stats: COMPLETE Column stats: PARTIAL
+                  Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                   Reduce Output Operator
                     key expressions: _col4 (type: int), _col5 (type: timestamp)
                     sort order: ++
                     Reduce Sink Vectorization:
-                        className: VectorReduceSinkOperator
-                        native: false
-                        nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                        nativeConditionsNotMet: No TopN IS false
-                    Statistics: Num rows: 25 Data size: 1000 Basic stats: COMPLETE Column stats: PARTIAL
+                        className: VectorReduceSinkObjectHashOperator
+                        native: true
+                        nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                    Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                     TopN Hash Memory Usage: 0.1
                     value expressions: _col0 (type: string), _col1 (type: string), _col2 (type: date), _col3 (type: float)
         Reducer 3 
@@ -2224,19 +2226,19 @@ STAGE PLANS:
                     className: VectorSelectOperator
                     native: true
                     projectedOutputColumns: [2, 3, 4, 5, 0, 1]
-                Statistics: Num rows: 25 Data size: 1000 Basic stats: COMPLETE Column stats: PARTIAL
+                Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                 Limit
                   Number of rows: 25
                   Limit Vectorization:
                       className: VectorLimitOperator
                       native: true
-                  Statistics: Num rows: 25 Data size: 1000 Basic stats: COMPLETE Column stats: PARTIAL
+                  Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                   File Output Operator
                     compressed: false
                     File Sink Vectorization:
                         className: VectorFileSinkOperator
                         native: false
-                    Statistics: Num rows: 25 Data size: 1000 Basic stats: COMPLETE Column stats: PARTIAL
+                    Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                     table:
                         input format: org.apache.hadoop.mapred.SequenceFileInputFormat
                         output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat
@@ -2348,9 +2350,11 @@ STAGE PLANS:
                       Group By Vectorization:
                           aggregators: VectorUDAFCountStar(*) -> bigint
                           className: VectorGroupByOperator
+                          groupByMode: HASH
                           vectorOutput: true
                           keyExpressions: col 5
                           native: false
+                          vectorProcessingMode: HASH
                           projectedOutputColumns: [0]
                       keys: fl_time (type: timestamp)
                       mode: hash
@@ -2363,7 +2367,7 @@ STAGE PLANS:
                         Reduce Sink Vectorization:
                             className: VectorReduceSinkMultiKeyOperator
                             native: true
-                            nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                            nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
                         Statistics: Num rows: 12 Data size: 576 Basic stats: COMPLETE Column stats: COMPLETE
                         value expressions: _col1 (type: bigint)
             Execution mode: vectorized, llap
@@ -2391,9 +2395,11 @@ STAGE PLANS:
                 Group By Vectorization:
                     aggregators: VectorUDAFCountMerge(col 1) -> bigint
                     className: VectorGroupByOperator
+                    groupByMode: MERGEPARTIAL
                     vectorOutput: true
                     keyExpressions: col 0
                     native: false
+                    vectorProcessingMode: MERGE_PARTIAL
                     projectedOutputColumns: [0]
                 keys: KEY._col0 (type: timestamp)
                 mode: mergepartial
@@ -2449,17 +2455,17 @@ POSTHOOK: Input: default@flights_tiny_orc_partitioned_timestamp@fl_time=2010-10-
 POSTHOOK: Input: default@flights_tiny_orc_partitioned_timestamp@fl_time=2010-10-31 07%3A00%3A00
 #### A masked pattern was here ####
 2010-10-20 07:00:00	11
-2010-10-21 07:00:00	12
-2010-10-22 07:00:00	11
 2010-10-23 07:00:00	12
-2010-10-24 07:00:00	12
 2010-10-25 07:00:00	12
+2010-10-22 07:00:00	11
 2010-10-26 07:00:00	13
+2010-10-29 07:00:00	12
+2010-10-31 07:00:00	8
+2010-10-21 07:00:00	12
+2010-10-24 07:00:00	12
 2010-10-27 07:00:00	11
 2010-10-28 07:00:00	12
-2010-10-29 07:00:00	12
 2010-10-30 07:00:00	11
-2010-10-31 07:00:00	8
 PREHOOK: query: CREATE TABLE flights_tiny_parquet STORED AS PARQUET AS
 SELECT origin_city_name, dest_city_name, fl_date, to_utc_timestamp(fl_date, 'America/Los_Angeles') as fl_time, arr_delay, fl_num
 FROM flights_tiny
@@ -2668,15 +2674,15 @@ POSTHOOK: Input: default@flights_tiny_parquet
 #### A masked pattern was here ####
 2010-10-20	11
 2010-10-21	12
-2010-10-22	11
+2010-10-26	13
+2010-10-30	11
 2010-10-23	12
 2010-10-24	12
 2010-10-25	12
-2010-10-26	13
-2010-10-27	11
+2010-10-22	11
 2010-10-28	12
 2010-10-29	12
-2010-10-30	11
+2010-10-27	11
 2010-10-31	8
 PREHOOK: query: explain vectorization expression
 select * from flights_tiny_parquet sort by fl_num, fl_date limit 25
@@ -2705,7 +2711,7 @@ STAGE PLANS:
             Map Operator Tree:
                 TableScan
                   alias: flights_tiny_parquet
-                  Statistics: Num rows: 137 Data size: 822 Basic stats: COMPLETE Column stats: NONE
+                  Statistics: Num rows: 137 Data size: 62304 Basic stats: COMPLETE Column stats: NONE
                   TableScan Vectorization:
                       native: true
                       projectedOutputColumns: [0, 1, 2, 3, 4, 5]
@@ -2716,26 +2722,25 @@ STAGE PLANS:
                         className: VectorSelectOperator
                         native: true
                         projectedOutputColumns: [0, 1, 2, 3, 4, 5]
-                    Statistics: Num rows: 137 Data size: 822 Basic stats: COMPLETE Column stats: NONE
+                    Statistics: Num rows: 137 Data size: 62304 Basic stats: COMPLETE Column stats: NONE
                     Reduce Output Operator
                       key expressions: _col5 (type: int), _col2 (type: date)
                       sort order: ++
                       Reduce Sink Vectorization:
-                          className: VectorReduceSinkOperator
-                          native: false
-                          nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                          nativeConditionsNotMet: No TopN IS false
-                      Statistics: Num rows: 137 Data size: 822 Basic stats: COMPLETE Column stats: NONE
+                          className: VectorReduceSinkObjectHashOperator
+                          native: true
+                          nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                      Statistics: Num rows: 137 Data size: 62304 Basic stats: COMPLETE Column stats: NONE
                       TopN Hash Memory Usage: 0.1
                       value expressions: _col0 (type: string), _col1 (type: string), _col3 (type: timestamp), _col4 (type: float)
             Execution mode: vectorized, llap
-            LLAP IO: no inputs
+            LLAP IO: all inputs (cache only)
             Map Vectorization:
                 enabled: true
                 enabledConditionsMet: hive.vectorized.use.vectorized.input.format IS true
                 groupByVectorOutput: true
                 inputFileFormats: org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat
-                allNative: false
+                allNative: true
                 usesVectorUDFAdaptor: false
                 vectorized: true
         Reducer 2 
@@ -2744,7 +2749,7 @@ STAGE PLANS:
                 enabled: true
                 enableConditionsMet: hive.vectorized.execution.reduce.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true
                 groupByVectorOutput: true
-                allNative: false
+                allNative: true
                 usesVectorUDFAdaptor: false
                 vectorized: true
             Reduce Operator Tree:
@@ -2755,22 +2760,21 @@ STAGE PLANS:
                     className: VectorSelectOperator
                     native: true
                     projectedOutputColumns: [2, 3, 1, 4, 5, 0]
-                Statistics: Num rows: 137 Data size: 822 Basic stats: COMPLETE Column stats: NONE
+                Statistics: Num rows: 137 Data size: 62304 Basic stats: COMPLETE Column stats: NONE
                 Limit
                   Number of rows: 25
                   Limit Vectorization:
                       className: VectorLimitOperator
                       native: true
-                  Statistics: Num rows: 25 Data size: 150 Basic stats: COMPLETE Column stats: NONE
+                  Statistics: Num rows: 25 Data size: 11350 Basic stats: COMPLETE Column stats: NONE
                   Reduce Output Operator
                     key expressions: _col5 (type: int), _col2 (type: date)
                     sort order: ++
                     Reduce Sink Vectorization:
-                        className: VectorReduceSinkOperator
-                        native: false
-                        nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                        nativeConditionsNotMet: No TopN IS false
-                    Statistics: Num rows: 25 Data size: 150 Basic stats: COMPLETE Column stats: NONE
+                        className: VectorReduceSinkObjectHashOperator
+                        native: true
+                        nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                    Statistics: Num rows: 25 Data size: 11350 Basic stats: COMPLETE Column stats: NONE
                     TopN Hash Memory Usage: 0.1
                     value expressions: _col0 (type: string), _col1 (type: string), _col3 (type: timestamp), _col4 (type: float)
         Reducer 3 
@@ -2790,19 +2794,19 @@ STAGE PLANS:
                     className: VectorSelectOperator
                     native: true
                     projectedOutputColumns: [2, 3, 1, 4, 5, 0]
-                Statistics: Num rows: 25 Data size: 150 Basic stats: COMPLETE Column stats: NONE
+                Statistics: Num rows: 25 Data size: 11350 Basic stats: COMPLETE Column stats: NONE
                 Limit
                   Number of rows: 25
                   Limit Vectorization:
                       className: VectorLimitOperator
                       native: true
-                  Statistics: Num rows: 25 Data size: 150 Basic stats: COMPLETE Column stats: NONE
+                  Statistics: Num rows: 25 Data size: 11350 Basic stats: COMPLETE Column stats: NONE
                   File Output Operator
                     compressed: false
                     File Sink Vectorization:
                         className: VectorFileSinkOperator
                         native: false
-                    Statistics: Num rows: 25 Data size: 150 Basic stats: COMPLETE Column stats: NONE
+                    Statistics: Num rows: 25 Data size: 11350 Basic stats: COMPLETE Column stats: NONE
                     table:
                         input format: org.apache.hadoop.mapred.SequenceFileInputFormat
                         output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat
@@ -2873,7 +2877,7 @@ STAGE PLANS:
             Map Operator Tree:
                 TableScan
                   alias: flights_tiny_parquet
-                  Statistics: Num rows: 137 Data size: 822 Basic stats: COMPLETE Column stats: NONE
+                  Statistics: Num rows: 137 Data size: 7392 Basic stats: COMPLETE Column stats: NONE
                   TableScan Vectorization:
                       native: true
                       projectedOutputColumns: [0, 1, 2, 3, 4, 5]
@@ -2884,20 +2888,22 @@ STAGE PLANS:
                         className: VectorSelectOperator
                         native: true
                         projectedOutputColumns: [2]
-                    Statistics: Num rows: 137 Data size: 822 Basic stats: COMPLETE Column stats: NONE
+                    Statistics: Num rows: 137 Data size: 7392 Basic stats: COMPLETE Column stats: NONE
                     Group By Operator
                       aggregations: count()
                       Group By Vectorization:
                           aggregators: VectorUDAFCountStar(*) -> bigint
                           className: VectorGroupByOperator
+                          groupByMode: HASH
                           vectorOutput: true
                           keyExpressions: col 2
                           native: false
+                          vectorProcessingMode: HASH
                           projectedOutputColumns: [0]
                       keys: fl_date (type: date)
                       mode: hash
                       outputColumnNames: _col0, _col1
-                      Statistics: Num rows: 137 Data size: 822 Basic stats: COMPLETE Column stats: NONE
+                      Statistics: Num rows: 137 Data size: 7392 Basic stats: COMPLETE Column stats: NONE
                       Reduce Output Operator
                         key expressions: _col0 (type: date)
                         sort order: +
@@ -2905,11 +2911,11 @@ STAGE PLANS:
                         Reduce Sink Vectorization:
                             className: VectorReduceSinkMultiKeyOperator
                             native: true
-                            nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                        Statistics: Num rows: 137 Data size: 822 Basic stats: COMPLETE Column stats: NONE
+                            nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                        Statistics: Num rows: 137 Data size: 7392 Basic stats: COMPLETE Column stats: NONE
                         value expressions: _col1 (type: bigint)
             Execution mode: vectorized, llap
-            LLAP IO: no inputs
+            LLAP IO: all inputs (cache only)
             Map Vectorization:
                 enabled: true
                 enabledConditionsMet: hive.vectorized.use.vectorized.input.format IS true
@@ -2933,20 +2939,22 @@ STAGE PLANS:
                 Group By Vectorization:
                     aggregators: VectorUDAFCountMerge(col 1) -> bigint
                     className: VectorGroupByOperator
+                    groupByMode: MERGEPARTIAL
                     vectorOutput: true
                     keyExpressions: col 0
                     native: false
+                    vectorProcessingMode: MERGE_PARTIAL
                     projectedOutputColumns: [0]
                 keys: KEY._col0 (type: date)
                 mode: mergepartial
                 outputColumnNames: _col0, _col1
-                Statistics: Num rows: 68 Data size: 408 Basic stats: COMPLETE Column stats: NONE
+                Statistics: Num rows: 68 Data size: 3669 Basic stats: COMPLETE Column stats: NONE
                 File Output Operator
                   compressed: false
                   File Sink Vectorization:
                       className: VectorFileSinkOperator
                       native: false
-                  Statistics: Num rows: 68 Data size: 408 Basic stats: COMPLETE Column stats: NONE
+                  Statistics: Num rows: 68 Data size: 3669 Basic stats: COMPLETE Column stats: NONE
                   table:
                       input format: org.apache.hadoop.mapred.SequenceFileInputFormat
                       output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat
@@ -2968,15 +2976,15 @@ POSTHOOK: Input: default@flights_tiny_parquet
 #### A masked pattern was here ####
 2010-10-20	11
 2010-10-21	12
-2010-10-22	11
+2010-10-26	13
+2010-10-30	11
 2010-10-23	12
 2010-10-24	12
 2010-10-25	12
-2010-10-26	13
-2010-10-27	11
+2010-10-22	11
 2010-10-28	12
 2010-10-29	12
-2010-10-30	11
+2010-10-27	11
 2010-10-31	8
 PREHOOK: query: CREATE TABLE flights_tiny_parquet_partitioned_date (
   origin_city_name STRING,
@@ -3347,15 +3355,15 @@ POSTHOOK: Input: default@flights_tiny_parquet_partitioned_date@fl_date=2010-10-3
 #### A masked pattern was here ####
 2010-10-20	11
 2010-10-21	12
-2010-10-22	11
+2010-10-26	13
+2010-10-30	11
 2010-10-23	12
 2010-10-24	12
 2010-10-25	12
-2010-10-26	13
-2010-10-27	11
+2010-10-22	11
 2010-10-28	12
 2010-10-29	12
-2010-10-30	11
+2010-10-27	11
 2010-10-31	8
 PREHOOK: query: explain vectorization expression
 select * from flights_tiny_parquet_partitioned_date
@@ -3380,7 +3388,7 @@ STAGE PLANS:
             Map Operator Tree:
                 TableScan
                   alias: flights_tiny_parquet_partitioned_date
-                  Statistics: Num rows: 137 Data size: 8357 Basic stats: COMPLETE Column stats: PARTIAL
+                  Statistics: Num rows: 137 Data size: 63269 Basic stats: COMPLETE Column stats: PARTIAL
                   TableScan Vectorization:
                       native: true
                       projectedOutputColumns: [0, 1, 2, 3, 4, 5]
@@ -3391,19 +3399,19 @@ STAGE PLANS:
                         className: VectorSelectOperator
                         native: true
                         projectedOutputColumns: [0, 1, 2, 3, 4, 5]
-                    Statistics: Num rows: 137 Data size: 7672 Basic stats: COMPLETE Column stats: PARTIAL
+                    Statistics: Num rows: 137 Data size: 62584 Basic stats: COMPLETE Column stats: PARTIAL
                     File Output Operator
                       compressed: false
                       File Sink Vectorization:
                           className: VectorFileSinkOperator
                           native: false
-                      Statistics: Num rows: 137 Data size: 7672 Basic stats: COMPLETE Column stats: PARTIAL
+                      Statistics: Num rows: 137 Data size: 62584 Basic stats: COMPLETE Column stats: PARTIAL
                       table:
                           input format: org.apache.hadoop.mapred.SequenceFileInputFormat
                           output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat
                           serde: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe
             Execution mode: vectorized, llap
-            LLAP IO: no inputs
+            LLAP IO: all inputs (cache only)
             Map Vectorization:
                 enabled: true
                 enabledConditionsMet: hive.vectorized.use.vectorized.input.format IS true
@@ -3615,7 +3623,7 @@ STAGE PLANS:
             Map Operator Tree:
                 TableScan
                   alias: flights_tiny_parquet_partitioned_date
-                  Statistics: Num rows: 137 Data size: 8357 Basic stats: COMPLETE Column stats: PARTIAL
+                  Statistics: Num rows: 137 Data size: 63269 Basic stats: COMPLETE Column stats: PARTIAL
                   TableScan Vectorization:
                       native: true
                       projectedOutputColumns: [0, 1, 2, 3, 4, 5]
@@ -3626,26 +3634,25 @@ STAGE PLANS:
                         className: VectorSelectOperator
                         native: true
                         projectedOutputColumns: [0, 1, 2, 3, 4, 5]
-                    Statistics: Num rows: 137 Data size: 8357 Basic stats: COMPLETE Column stats: PARTIAL
+                    Statistics: Num rows: 137 Data size: 63269 Basic stats: COMPLETE Column stats: PARTIAL
                     Reduce Output Operator
                       key expressions: _col4 (type: int), _col5 (type: date)
                       sort order: ++
                       Reduce Sink Vectorization:
-                          className: VectorReduceSinkOperator
-                          native: false
-                          nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                          nativeConditionsNotMet: No TopN IS false
-                      Statistics: Num rows: 137 Data size: 8357 Basic stats: COMPLETE Column stats: PARTIAL
+                          className: VectorReduceSinkObjectHashOperator
+                          native: true
+                          nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                      Statistics: Num rows: 137 Data size: 63269 Basic stats: COMPLETE Column stats: PARTIAL
                       TopN Hash Memory Usage: 0.1
                       value expressions: _col0 (type: string), _col1 (type: string), _col2 (type: timestamp), _col3 (type: float)
             Execution mode: vectorized, llap
-            LLAP IO: no inputs
+            LLAP IO: all inputs (cache only)
             Map Vectorization:
                 enabled: true
                 enabledConditionsMet: hive.vectorized.use.vectorized.input.format IS true
                 groupByVectorOutput: true
                 inputFileFormats: org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat
-                allNative: false
+                allNative: true
                 usesVectorUDFAdaptor: false
                 vectorized: true
         Reducer 2 
@@ -3654,7 +3661,7 @@ STAGE PLANS:
                 enabled: true
                 enableConditionsMet: hive.vectorized.execution.reduce.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true
                 groupByVectorOutput: true
-                allNative: false
+                allNative: true
                 usesVectorUDFAdaptor: false
                 vectorized: true
             Reduce Operator Tree:
@@ -3665,22 +3672,21 @@ STAGE PLANS:
                     className: VectorSelectOperator
                     native: true
                     projectedOutputColumns: [2, 3, 4, 5, 0, 1]
-                Statistics: Num rows: 137 Data size: 7672 Basic stats: COMPLETE Column stats: PARTIAL
+                Statistics: Num rows: 137 Data size: 62584 Basic stats: COMPLETE Column stats: PARTIAL
                 Limit
                   Number of rows: 25
                   Limit Vectorization:
                       className: VectorLimitOperator
                       native: true
-                  Statistics: Num rows: 25 Data size: 1400 Basic stats: COMPLETE Column stats: PARTIAL
+                  Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                   Reduce Output Operator
                     key expressions: _col4 (type: int), _col5 (type: date)
                     sort order: ++
                     Reduce Sink Vectorization:
-                        className: VectorReduceSinkOperator
-                        native: false
-                        nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                        nativeConditionsNotMet: No TopN IS false
-                    Statistics: Num rows: 25 Data size: 1400 Basic stats: COMPLETE Column stats: PARTIAL
+                        className: VectorReduceSinkObjectHashOperator
+                        native: true
+                        nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                    Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                     TopN Hash Memory Usage: 0.1
                     value expressions: _col0 (type: string), _col1 (type: string), _col2 (type: timestamp), _col3 (type: float)
         Reducer 3 
@@ -3700,19 +3706,19 @@ STAGE PLANS:
                     className: VectorSelectOperator
                     native: true
                     projectedOutputColumns: [2, 3, 4, 5, 0, 1]
-                Statistics: Num rows: 25 Data size: 1400 Basic stats: COMPLETE Column stats: PARTIAL
+                Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                 Limit
                   Number of rows: 25
                   Limit Vectorization:
                       className: VectorLimitOperator
                       native: true
-                  Statistics: Num rows: 25 Data size: 1400 Basic stats: COMPLETE Column stats: PARTIAL
+                  Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                   File Output Operator
                     compressed: false
                     File Sink Vectorization:
                         className: VectorFileSinkOperator
                         native: false
-                    Statistics: Num rows: 25 Data size: 1400 Basic stats: COMPLETE Column stats: PARTIAL
+                    Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                     table:
                         input format: org.apache.hadoop.mapred.SequenceFileInputFormat
                         output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat
@@ -3824,9 +3830,11 @@ STAGE PLANS:
                       Group By Vectorization:
                           aggregators: VectorUDAFCountStar(*) -> bigint
                           className: VectorGroupByOperator
+                          groupByMode: HASH
                           vectorOutput: true
                           keyExpressions: col 5
                           native: false
+                          vectorProcessingMode: HASH
                           projectedOutputColumns: [0]
                       keys: fl_date (type: date)
                       mode: hash
@@ -3839,11 +3847,11 @@ STAGE PLANS:
                         Reduce Sink Vectorization:
                             className: VectorReduceSinkMultiKeyOperator
                             native: true
-                            nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                            nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
                         Statistics: Num rows: 12 Data size: 768 Basic stats: COMPLETE Column stats: COMPLETE
                         value expressions: _col1 (type: bigint)
             Execution mode: vectorized, llap
-            LLAP IO: no inputs
+            LLAP IO: all inputs (cache only)
             Map Vectorization:
                 enabled: true
                 enabledConditionsMet: hive.vectorized.use.vectorized.input.format IS true
@@ -3867,9 +3875,11 @@ STAGE PLANS:
                 Group By Vectorization:
                     aggregators: VectorUDAFCountMerge(col 1) -> bigint
                     className: VectorGroupByOperator
+                    groupByMode: MERGEPARTIAL
                     vectorOutput: true
                     keyExpressions: col 0
                     native: false
+                    vectorProcessingMode: MERGE_PARTIAL
                     projectedOutputColumns: [0]
                 keys: KEY._col0 (type: date)
                 mode: mergepartial
@@ -3926,15 +3936,15 @@ POSTHOOK: Input: default@flights_tiny_parquet_partitioned_date@fl_date=2010-10-3
 #### A masked pattern was here ####
 2010-10-20	11
 2010-10-21	12
-2010-10-22	11
+2010-10-26	13
+2010-10-30	11
 2010-10-23	12
 2010-10-24	12
 2010-10-25	12
-2010-10-26	13
-2010-10-27	11
+2010-10-22	11
 2010-10-28	12
 2010-10-29	12
-2010-10-30	11
+2010-10-27	11
 2010-10-31	8
 PREHOOK: query: CREATE TABLE flights_tiny_parquet_partitioned_timestamp (
   origin_city_name STRING,
@@ -4304,17 +4314,17 @@ POSTHOOK: Input: default@flights_tiny_parquet_partitioned_timestamp@fl_time=2010
 POSTHOOK: Input: default@flights_tiny_parquet_partitioned_timestamp@fl_time=2010-10-31 07%3A00%3A00
 #### A masked pattern was here ####
 2010-10-20 07:00:00	11
-2010-10-21 07:00:00	12
-2010-10-22 07:00:00	11
 2010-10-23 07:00:00	12
-2010-10-24 07:00:00	12
 2010-10-25 07:00:00	12
+2010-10-22 07:00:00	11
 2010-10-26 07:00:00	13
+2010-10-29 07:00:00	12
+2010-10-31 07:00:00	8
+2010-10-21 07:00:00	12
+2010-10-24 07:00:00	12
 2010-10-27 07:00:00	11
 2010-10-28 07:00:00	12
-2010-10-29 07:00:00	12
 2010-10-30 07:00:00	11
-2010-10-31 07:00:00	8
 PREHOOK: query: explain vectorization expression
 select * from flights_tiny_parquet_partitioned_timestamp
 PREHOOK: type: QUERY
@@ -4338,7 +4348,7 @@ STAGE PLANS:
             Map Operator Tree:
                 TableScan
                   alias: flights_tiny_parquet_partitioned_timestamp
-                  Statistics: Num rows: 137 Data size: 6165 Basic stats: COMPLETE Column stats: PARTIAL
+                  Statistics: Num rows: 137 Data size: 63189 Basic stats: COMPLETE Column stats: PARTIAL
                   TableScan Vectorization:
                       native: true
                       projectedOutputColumns: [0, 1, 2, 3, 4, 5]
@@ -4349,19 +4359,19 @@ STAGE PLANS:
                         className: VectorSelectOperator
                         native: true
                         projectedOutputColumns: [0, 1, 2, 3, 4, 5]
-                    Statistics: Num rows: 137 Data size: 5480 Basic stats: COMPLETE Column stats: PARTIAL
+                    Statistics: Num rows: 137 Data size: 62504 Basic stats: COMPLETE Column stats: PARTIAL
                     File Output Operator
                       compressed: false
                       File Sink Vectorization:
                           className: VectorFileSinkOperator
                           native: false
-                      Statistics: Num rows: 137 Data size: 5480 Basic stats: COMPLETE Column stats: PARTIAL
+                      Statistics: Num rows: 137 Data size: 62504 Basic stats: COMPLETE Column stats: PARTIAL
                       table:
                           input format: org.apache.hadoop.mapred.SequenceFileInputFormat
                           output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat
                           serde: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe
             Execution mode: vectorized, llap
-            LLAP IO: no inputs
+            LLAP IO: all inputs (cache only)
             Map Vectorization:
                 enabled: true
                 enabledConditionsMet: hive.vectorized.use.vectorized.input.format IS true
@@ -4573,7 +4583,7 @@ STAGE PLANS:
             Map Operator Tree:
                 TableScan
                   alias: flights_tiny_parquet_partitioned_timestamp
-                  Statistics: Num rows: 137 Data size: 6165 Basic stats: COMPLETE Column stats: PARTIAL
+                  Statistics: Num rows: 137 Data size: 63189 Basic stats: COMPLETE Column stats: PARTIAL
                   TableScan Vectorization:
                       native: true
                       projectedOutputColumns: [0, 1, 2, 3, 4, 5]
@@ -4584,26 +4594,25 @@ STAGE PLANS:
                         className: VectorSelectOperator
                         native: true
                         projectedOutputColumns: [0, 1, 2, 3, 4, 5]
-                    Statistics: Num rows: 137 Data size: 6165 Basic stats: COMPLETE Column stats: PARTIAL
+                    Statistics: Num rows: 137 Data size: 63189 Basic stats: COMPLETE Column stats: PARTIAL
                     Reduce Output Operator
                       key expressions: _col4 (type: int), _col5 (type: timestamp)
                       sort order: ++
                       Reduce Sink Vectorization:
-                          className: VectorReduceSinkOperator
-                          native: false
-                          nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                          nativeConditionsNotMet: No TopN IS false
-                      Statistics: Num rows: 137 Data size: 6165 Basic stats: COMPLETE Column stats: PARTIAL
+                          className: VectorReduceSinkObjectHashOperator
+                          native: true
+                          nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                      Statistics: Num rows: 137 Data size: 63189 Basic stats: COMPLETE Column stats: PARTIAL
                       TopN Hash Memory Usage: 0.1
                       value expressions: _col0 (type: string), _col1 (type: string), _col2 (type: date), _col3 (type: float)
             Execution mode: vectorized, llap
-            LLAP IO: no inputs
+            LLAP IO: all inputs (cache only)
             Map Vectorization:
                 enabled: true
                 enabledConditionsMet: hive.vectorized.use.vectorized.input.format IS true
                 groupByVectorOutput: true
                 inputFileFormats: org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat
-                allNative: false
+                allNative: true
                 usesVectorUDFAdaptor: false
                 vectorized: true
         Reducer 2 
@@ -4612,7 +4621,7 @@ STAGE PLANS:
                 enabled: true
                 enableConditionsMet: hive.vectorized.execution.reduce.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true
                 groupByVectorOutput: true
-                allNative: false
+                allNative: true
                 usesVectorUDFAdaptor: false
                 vectorized: true
             Reduce Operator Tree:
@@ -4623,22 +4632,21 @@ STAGE PLANS:
                     className: VectorSelectOperator
                     native: true
                     projectedOutputColumns: [2, 3, 4, 5, 0, 1]
-                Statistics: Num rows: 137 Data size: 5480 Basic stats: COMPLETE Column stats: PARTIAL
+                Statistics: Num rows: 137 Data size: 62504 Basic stats: COMPLETE Column stats: PARTIAL
                 Limit
                   Number of rows: 25
                   Limit Vectorization:
                       className: VectorLimitOperator
                       native: true
-                  Statistics: Num rows: 25 Data size: 1000 Basic stats: COMPLETE Column stats: PARTIAL
+                  Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                   Reduce Output Operator
                     key expressions: _col4 (type: int), _col5 (type: timestamp)
                     sort order: ++
                     Reduce Sink Vectorization:
-                        className: VectorReduceSinkOperator
-                        native: false
-                        nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
-                        nativeConditionsNotMet: No TopN IS false
-                    Statistics: Num rows: 25 Data size: 1000 Basic stats: COMPLETE Column stats: PARTIAL
+                        className: VectorReduceSinkObjectHashOperator
+                        native: true
+                        nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                    Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                     TopN Hash Memory Usage: 0.1
                     value expressions: _col0 (type: string), _col1 (type: string), _col2 (type: date), _col3 (type: float)
         Reducer 3 
@@ -4658,19 +4666,19 @@ STAGE PLANS:
                     className: VectorSelectOperator
                     native: true
                     projectedOutputColumns: [2, 3, 4, 5, 0, 1]
-                Statistics: Num rows: 25 Data size: 1000 Basic stats: COMPLETE Column stats: PARTIAL
+                Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                 Limit
                   Number of rows: 25
                   Limit Vectorization:
                       className: VectorLimitOperator
                       native: true
-                  Statistics: Num rows: 25 Data size: 1000 Basic stats: COMPLETE Column stats: PARTIAL
+                  Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                   File Output Operator
                     compressed: false
                     File Sink Vectorization:
                         className: VectorFileSinkOperator
                         native: false
-                    Statistics: Num rows: 25 Data size: 1000 Basic stats: COMPLETE Column stats: PARTIAL
+                    Statistics: Num rows: 25 Data size: 11800 Basic stats: COMPLETE Column stats: PARTIAL
                     table:
                         input format: org.apache.hadoop.mapred.SequenceFileInputFormat
                         output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat
@@ -4782,9 +4790,11 @@ STAGE PLANS:
                       Group By Vectorization:
                           aggregators: VectorUDAFCountStar(*) -> bigint
                           className: VectorGroupByOperator
+                          groupByMode: HASH
                           vectorOutput: true
                           keyExpressions: col 5
                           native: false
+                          vectorProcessingMode: HASH
                           projectedOutputColumns: [0]
                       keys: fl_time (type: timestamp)
                       mode: hash
@@ -4797,11 +4807,11 @@ STAGE PLANS:
                         Reduce Sink Vectorization:
                             className: VectorReduceSinkMultiKeyOperator
                             native: true
-                            nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
+                            nativeConditionsMet: hive.vectorized.execution.reducesink.new.enabled IS true, hive.execution.engine tez IN [tez, spark] IS true, No PTF TopN IS true, No DISTINCT columns IS true, BinarySortableSerDe for keys IS true, LazyBinarySerDe for values IS true
                         Statistics: Num rows: 12 Data size: 576 Basic stats: COMPLETE Column stats: COMPLETE
                         value expressions: _col1 (type: bigint)
             Execution mode: vectorized, llap
-            LLAP IO: no inputs
+            LLAP IO: all inputs (cache only)
             Map Vectorization:
                 enabled: true
                 enabledConditionsMet: hive.vectorized.use.vectorized.input.format IS true
@@ -4825,9 +4835,11 @@ STAGE PLANS:
                 Group By Vectorization:
                     aggregators: VectorUDAFCountMerge(col 1) -> bigint
                     className: VectorGroupByOperator
+                    groupByMode: MERGEPARTIAL
                     vectorOutput: true
                     keyExpressions: col 0
                     native: false
+                    vectorProcessingMode: MERGE_PARTIAL
                     projectedOutputColumns: [0]
                 keys: KEY._col0 (type: timestamp)
                 mode: mergepartial
@@ -4883,14 +4895,14 @@ POSTHOOK: Input: default@flights_tiny_parquet_partitioned_timestamp@fl_time=2010
 POSTHOOK: Input: default@flights_tiny_parquet_partitioned_timestamp@fl_time=2010-10-31 07%3A00%3A00
 #### A masked pattern was here ####
 2010-10-20 07:00:00	11
-2010-10-21 07:00:00	12
-2010-10-22 07:00:00	11
 2010-10-23 07:00:00	12
-2010-10-24 07:00:00	12
 2010-10-25 07:00:00	12
+2010-10-22 07:00:00	11
 2010-10-26 07:00:00	13
+2010-10-29 07:00:00	12
+2010-10-31 07:00:00	8
+2010-10-21 07:00:00	12
+2010-10-24 07:00:00	12
 2010-10-27 07:00:00	11
 2010-10-28 07:00:00	12
-2010-10-29 07:00:00	12
 2010-10-30 07:00:00	11
-2010-10-31 07:00:00	8
