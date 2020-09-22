@@ -44,12 +44,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.antlr.runtime.ClassicToken;
 import org.antlr.runtime.CommonToken;
+import org.antlr.runtime.tree.Tree;
 import org.antlr.runtime.tree.TreeVisitor;
 import org.antlr.runtime.tree.TreeVisitorAction;
 import org.apache.calcite.adapter.druid.DruidQuery;
 import org.apache.calcite.adapter.druid.DruidRules;
 import org.apache.calcite.adapter.druid.DruidSchema;
 import org.apache.calcite.adapter.druid.DruidTable;
+import org.apache.calcite.config.CalciteConnectionConfig;
+import org.apache.calcite.config.CalciteConnectionConfigImpl;
+import org.apache.calcite.config.CalciteConnectionProperty;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptMaterialization;
 import org.apache.calcite.plan.RelOptPlanner;
@@ -137,8 +141,8 @@ import org.apache.hadoop.hive.ql.metadata.HiveException;
 import org.apache.hadoop.hive.ql.metadata.Table;
 import org.apache.hadoop.hive.ql.metadata.VirtualColumn;
 import org.apache.hadoop.hive.ql.optimizer.calcite.CalciteSemanticException;
-import org.apache.hadoop.hive.ql.optimizer.calcite.CalciteSubquerySemanticException;
 import org.apache.hadoop.hive.ql.optimizer.calcite.CalciteSemanticException.UnsupportedFeature;
+import org.apache.hadoop.hive.ql.optimizer.calcite.CalciteSubquerySemanticException;
 import org.apache.hadoop.hive.ql.optimizer.calcite.CalciteViewSemanticException;
 import org.apache.hadoop.hive.ql.optimizer.calcite.HiveCalciteUtil;
 import org.apache.hadoop.hive.ql.optimizer.calcite.HiveDefaultRelMetadataProvider;
@@ -1063,7 +1067,10 @@ public class CalcitePlanner extends SemanticAnalyzer {
     if (this.columnAccessInfo == null) {
       this.columnAccessInfo = new ColumnAccessInfo();
     }
-    calcitePlannerAction = new CalcitePlannerAction(prunedPartitions, this.columnAccessInfo);
+    calcitePlannerAction = new CalcitePlannerAction(
+        prunedPartitions,
+        ctx.getOpContext().getColStatsCache(),
+        this.columnAccessInfo);
 
     try {
       optimizedOptiqPlan = Frameworks.withPlanner(calcitePlannerAction, Frameworks
@@ -1100,7 +1107,10 @@ public class CalcitePlanner extends SemanticAnalyzer {
     if (this.columnAccessInfo == null) {
       this.columnAccessInfo = new ColumnAccessInfo();
     }
-    calcitePlannerAction = new CalcitePlannerAction(prunedPartitions, this.columnAccessInfo);
+    calcitePlannerAction = new CalcitePlannerAction(
+        prunedPartitions,
+        ctx.getOpContext().getColStatsCache(),
+        this.columnAccessInfo);
 
     try {
       optimizedOptiqPlan = Frameworks.withPlanner(calcitePlannerAction, Frameworks
@@ -1262,6 +1272,7 @@ public class CalcitePlanner extends SemanticAnalyzer {
     private RelOptCluster                                 cluster;
     private RelOptSchema                                  relOptSchema;
     private final Map<String, PrunedPartitionList>        partitionCache;
+    private final Map<String, ColumnStatsList>            colStatsCache;
     private final ColumnAccessInfo columnAccessInfo;
     private Map<HiveProject, Table> viewProjectToTableSchema;
 
@@ -1278,8 +1289,12 @@ public class CalcitePlanner extends SemanticAnalyzer {
     LinkedHashMap<RelNode, RowResolver>                   relToHiveRR                   = new LinkedHashMap<RelNode, RowResolver>();
     LinkedHashMap<RelNode, ImmutableMap<String, Integer>> relToHiveColNameCalcitePosMap = new LinkedHashMap<RelNode, ImmutableMap<String, Integer>>();
 
-    CalcitePlannerAction(Map<String, PrunedPartitionList> partitionCache, ColumnAccessInfo columnAccessInfo) {
+    CalcitePlannerAction(
+        Map<String, PrunedPartitionList> partitionCache,
+        Map<String, ColumnStatsList> colStatsCache,
+        ColumnAccessInfo columnAccessInfo) {
       this.partitionCache = partitionCache;
+      this.colStatsCache = colStatsCache;
       this.columnAccessInfo = columnAccessInfo;
     }
 
@@ -2263,7 +2278,7 @@ public class CalcitePlanner extends SemanticAnalyzer {
           }
           RelOptHiveTable optTable = new RelOptHiveTable(relOptSchema, fullyQualifiedTabName,
                   rowType, tabMetaData, nonPartitionColumns, partitionColumns, virtualCols, conf,
-                  partitionCache, noColsMissingStats);
+                  partitionCache, colStatsCache, noColsMissingStats);
           // Build Druid query
           String address = HiveConf.getVar(conf,
                   HiveConf.ConfVars.HIVE_DRUID_BROKER_DEFAULT_ADDRESS);
@@ -2308,7 +2323,7 @@ public class CalcitePlanner extends SemanticAnalyzer {
           }
           RelOptHiveTable optTable = new RelOptHiveTable(relOptSchema, fullyQualifiedTabName,
                   rowType, tabMetaData, nonPartitionColumns, partitionColumns, virtualCols, conf,
-                  partitionCache, noColsMissingStats);
+                  partitionCache, colStatsCache, noColsMissingStats);
           // Build Hive Table Scan Rel
           tableRel = new HiveTableScan(cluster, cluster.traitSetOf(HiveRelNode.CONVENTION), optTable,
               null == tableAlias ? tabMetaData.getTableName() : tableAlias,
