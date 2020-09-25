@@ -101,7 +101,7 @@ public class HttpServer {
 
     if (b.useSPNEGO) {
       // Secure the web server with kerberos
-      setupSpnegoFilter(b);
+      setupSpnegoFilter(b, webAppContext);
     }
 
     initializeWebServer(b);
@@ -326,7 +326,7 @@ public class HttpServer {
   /**
    * Secure the web server with kerberos (AuthenticationFilter).
    */
-  void setupSpnegoFilter(Builder b) throws IOException {
+  void setupSpnegoFilter(Builder b, ServletContextHandler ctx) throws IOException {
     Map<String, String> params = new HashMap<String, String>();
     params.put("kerberos.principal",
       SecurityUtil.getServerPrincipal(b.spnegoPrincipal, b.host));
@@ -335,8 +335,7 @@ public class HttpServer {
     FilterHolder holder = new FilterHolder();
     holder.setClassName(AuthenticationFilter.class.getName());
     holder.setInitParameters(params);
-
-    ServletHandler handler = webAppContext.getServletHandler();
+    ServletHandler handler = ctx.getServletHandler();
     handler.addFilterWithMapping(
       holder, "/*", FilterMapping.ALL);
   }
@@ -378,7 +377,7 @@ public class HttpServer {
     }
   }
 
-  void initializeWebServer(Builder b) {
+  void initializeWebServer(Builder b) throws IOException {
     // Create the thread pool for the web server to handle HTTP requests
     QueuedThreadPool threadPool = new QueuedThreadPool();
     if (b.maxThreads > 0) {
@@ -430,7 +429,12 @@ public class HttpServer {
       ServletContextHandler logCtx =
         new ServletContextHandler(contexts, "/logs");
       setContextAttributes(logCtx.getServletContext(), b.contextAttrs);
-      logCtx.addServlet(AdminAuthorizedServlet.class, "/*");
+      if (b.useSPNEGO) {
+        setupSpnegoFilter(b, logCtx);
+      }
+
+//      Allow any user to access this endpoint without being authenticated
+//      logCtx.addServlet(AdminAuthorizedServlet.class, "/*");
       logCtx.setResourceBase(logDir);
       logCtx.setDisplayName("logs");
     }
