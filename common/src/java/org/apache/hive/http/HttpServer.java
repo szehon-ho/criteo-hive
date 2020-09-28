@@ -435,6 +435,7 @@ public class HttpServer {
 
 //      Allow any user to access this endpoint without being authenticated
 //      logCtx.addServlet(AdminAuthorizedServlet.class, "/*");
+      logCtx.addServlet(DefaultServlet.class, "/*");
       logCtx.setResourceBase(logDir);
       logCtx.setDisplayName("logs");
     }
