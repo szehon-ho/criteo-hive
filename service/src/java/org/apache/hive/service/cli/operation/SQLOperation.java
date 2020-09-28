@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -58,7 +59,6 @@ import org.apache.hadoop.hive.ql.exec.Task;
 import org.apache.hadoop.hive.ql.log.PerfLogger;
 import org.apache.hadoop.hive.ql.metadata.Hive;
 import org.apache.hadoop.hive.ql.processors.CommandProcessorResponse;
-import org.apache.hadoop.hive.ql.session.OperationLog;
 import org.apache.hadoop.hive.ql.session.SessionState;
 import org.apache.hadoop.hive.serde.serdeConstants;
 import org.apache.hadoop.hive.serde2.AbstractSerDe;
@@ -68,7 +68,6 @@ import org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.StructField;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
-import org.apache.hadoop.hive.serde2.thrift.ThriftJDBCBinarySerDe;
 import org.apache.hadoop.hive.shims.Utils;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.security.UserGroupInformation;
@@ -157,7 +156,7 @@ public class SQLOperation extends ExecuteStatementOperation {
 
   /**
    * Compile the query and extract metadata
-   * @param sqlOperationConf
+   * @param queryState
    * @throws HiveSQLException
    */
   public void prepare(QueryState queryState) throws HiveSQLException {
@@ -256,6 +255,19 @@ public class SQLOperation extends ExecuteStatementOperation {
       // case, when calling fetch queries since execute() has returned.
       // For now, we disable the test attempts.
       driver.setTryCount(Integer.MAX_VALUE);
+
+      HiveConf conf = parentSession.getSessionConf();
+      int webuiPort = conf.getIntVar(HiveConf.ConfVars.HIVE_SERVER2_WEBUI_PORT);
+      if (webuiPort > 0) {
+        // Provide useful WebUI links to the client
+        String hostname = InetAddress.getLocalHost().getHostName();
+        String webuiUrl = "http://" + hostname + ":" + webuiPort;
+        String sessionId = SessionState.get().getSessionId();
+        String queryId = conf.getVar(HiveConf.ConfVars.HIVEQUERYID);
+        LOG.info("Query drilldown: " + webuiUrl + "/query_page?operationId=" + sqlOpDisplay.operationId);
+        LOG.info("Query logs: " + webuiUrl + "/logs/" + sessionId + "/" + queryId);
+      }
+
       response = driver.run();
       if (0 != response.getResponseCode()) {
         throw toSQLException("Error while processing statement", response);
@@ -382,7 +394,6 @@ public class SQLOperation extends ExecuteStatementOperation {
 
   /**
    * Returns the current UGI on the stack
-   * @param opConfig
    * @return UserGroupInformation
    * @throws HiveSQLException
    */
