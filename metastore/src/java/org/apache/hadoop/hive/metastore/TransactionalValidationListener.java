@@ -109,7 +109,7 @@ public final class TransactionalValidationListener extends MetaStorePreEventList
             " format (such as ORC)");
       }
 
-      if (newTable.getTableType().equals(TableType.EXTERNAL_TABLE.toString())) {
+      if (MetaStoreUtils.isExternalTable(newTable)) {
         throw new MetaException(newTable.getDbName() + "." + newTable.getTableName() +
             " cannot be declared transactional because it's an external table");
       }
@@ -200,7 +200,7 @@ public final class TransactionalValidationListener extends MetaStorePreEventList
             " format (such as ORC)");
       }
 
-      if (newTable.getTableType().equals(TableType.EXTERNAL_TABLE.toString())) {
+      if (MetaStoreUtils.isExternalTable(newTable)) {
         throw new MetaException(newTable.getDbName() + "." + newTable.getTableName() +
             " cannot be declared transactional because it's an external table");
       }
