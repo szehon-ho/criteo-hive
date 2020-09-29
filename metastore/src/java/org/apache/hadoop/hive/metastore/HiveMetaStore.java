@@ -1466,7 +1466,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
             tblPath = wh.getTablePath(
                 ms.getDatabase(tbl.getDbName()), tbl.getTableName());
           } else {
-            if (!isExternal(tbl) && !MetaStoreUtils.isNonNativeTable(tbl)) {
+            if (!MetaStoreUtils.isExternalTable(tbl) && !MetaStoreUtils.isNonNativeTable(tbl)) {
               LOG.warn("Location: " + tbl.getSd().getLocation()
                   + " specified for non-external table:" + tbl.getTableName());
             }
@@ -1641,7 +1641,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
       } finally {
         if (!success) {
           ms.rollbackTransaction();
-        } else if (deleteData && !isExternal) {
+        } else if (deleteData && !MetaStoreUtils.isExternalTable(tbl)) {
           // Data needs deletion. Check if trash may be skipped.
           // Delete the data in the partitions which have other locations
           deletePartitionData(partPaths, ifPurge);

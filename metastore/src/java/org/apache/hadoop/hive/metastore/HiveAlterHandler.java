@@ -427,7 +427,7 @@ public class HiveAlterHandler implements AlterHandler {
       }
 
       // if the external partition is renamed, the file should not change
-      if (tbl.getTableType().equals(TableType.EXTERNAL_TABLE.toString())) {
+      if (MetaStoreUtils.isExternalTable(tbl)) {
         new_part.getSd().setLocation(oldPart.getSd().getLocation());
         String oldPartName = Warehouse.makePartName(tbl.getPartitionKeys(), oldPart.getValues());
         try {
