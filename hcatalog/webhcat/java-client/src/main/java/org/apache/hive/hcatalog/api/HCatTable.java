@@ -133,7 +133,7 @@ public class HCatTable {
     tableName = hiveTable.getTableName();
     dbName = hiveTable.getDbName();
     tableType = hiveTable.getTableType();
-    isExternal = hiveTable.getTableType().equals(TableType.EXTERNAL_TABLE.toString());
+    isExternal = MetaStoreUtils.isExternalTable(hiveTable);
     sd = hiveTable.getSd();
     for (FieldSchema colFS : sd.getCols()) {
       cols.add(HCatSchemaUtils.getHCatFieldSchema(colFS));
