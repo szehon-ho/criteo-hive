@@ -2590,14 +2590,18 @@ public class HiveMetaStore extends ThriftHiveMetastore {
     @Override
     public int add_partitions(final List<Partition> parts) throws MetaException,
         InvalidObjectException, AlreadyExistsException {
-      startFunction("add_partition");
       if (parts.size() == 0) {
+        startFunction("add_partitions");
+        endFunction("add_partitions", true, null);
         return 0;
       }
 
       Integer ret = null;
       Exception ex = null;
+      String dbName = parts.get(0).getDbName();
+      String tableName = parts.get(0).getTableName();
       try {
+        startTableFunction("add_partitions", dbName, tableName);
         // Old API assumed all partitions belong to the same table; keep the same assumption
         ret = add_partitions_core(getMS(), parts.get(0).getDbName(),
             parts.get(0).getTableName(), parts, false).size();
@@ -2614,9 +2618,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        String dbName = parts.get(0).getDbName();
-        String tableName = parts.get(0).getTableName();
-        endFunction("add_partition", ret != null, ex, dbName, tableName);
+        endFunction("add_partitions", ret != null, ex, dbName, tableName);
       }
       return ret;
     }
@@ -3753,8 +3755,6 @@ public class HiveMetaStore extends ThriftHiveMetastore {
     public PartitionValuesResponse get_partition_values(PartitionValuesRequest request) throws MetaException {
       String dbName = request.getDbName();
       String tblName = request.getTblName();
-      List<FieldSchema> partCols = new ArrayList<FieldSchema>();
-      partCols.add(request.getPartitionKeys().get(0));
       return getMS().listPartitionValues(dbName, tblName, request.getPartitionKeys(),
           request.isApplyDistinct(), request.getFilter(), request.isAscending(),
           request.getPartitionOrder(), request.getMaxParts());
@@ -3921,7 +3921,7 @@ public class HiveMetaStore extends ThriftHiveMetastore {
           throw newMetaException(e);
         }
       } finally {
-        endFunction("alter_partition", oldParts != null, ex, db_name, tbl_name);
+        endFunction("alter_partitions", oldParts != null, ex, db_name, tbl_name);
       }
     }
 
